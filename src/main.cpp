@@ -1,6 +1,6 @@
-#include "Server/Server.hpp"
-#include "Client/Client.hpp"
-#include "Channel/Channel.hpp"
+#include "../include/Server.hpp"
+#include "../include/Client.hpp"
+#include "../include/Channel.hpp"
 #include <iostream>
 
 int main(int argc, char* argv[])
