@@ -1,7 +1,6 @@
 #include "../include/Server.hpp"
-#include "../include/Client.hpp"
-#include "../include/Channel.hpp"
-#include <iostream>
+//#include "../include/Client.hpp"
+//#include "../include/Channel.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -10,12 +9,12 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    int port = std::atoi(argv[1]);
-    std::string password = argv[2];
+    //int port = std::atoi(argv[1]);
+    //std::string password = argv[2];
     
     try {
-        Server server(port, password);
-        server.start();
+        Server server;
+        server.start(argv[1], argv[2]);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

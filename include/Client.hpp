@@ -1,27 +1,27 @@
 #ifndef CLIENT_HPP
-#define CLIENT_HPP
+# define CLIENT_HPP
 
-#include <string>
+# include <string>
 
 class Client {
 private:
-    int _fd;
-    std::string Nick;
-    std::string Username;
-    std::string Realname;
+    int fd;
+    std::string nick;
+    std::string username;
+    std::string realname;
     bool is_authenticated;
     bool is_registered;
 
 public:
-    Client(int fd);
+    Client(int _fd);
     ~Client();
     
     int getFd();
     const std::string& getNickname();
-    void setNickname(const std::string& nick);
+    void setNickname(const std::string& _nick);
     bool isAuthenticated();
-    void setAuthenticated(bool auth);
-    void sendMessage(const std::string& message);
+    void setAuthenticated(bool _auth);
+    void sendMessage(const std::string& _message);
 };
 
 #endif

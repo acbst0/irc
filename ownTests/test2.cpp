@@ -9,26 +9,13 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <errno.h>
-#include <iostream>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <set>
 #include <string>
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
-
 #include <cerrno>
-#include <errno.h>
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <poll.h>
 
 #define BACKLOG 10
 #define BUF_SIZE 1024
