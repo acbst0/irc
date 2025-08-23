@@ -32,16 +32,18 @@ class Server {
 	private:
 	    //int port;
 	    //std::string password;
+	    //std::map<std::string, Channel*> channels;
 	    int serverFd;
 		struct pollfd pfds[BACKLOG + 1];
 		int num_of_pfd;
 	    std::vector<Client *> clients;
-	    //std::map<std::string, Channel*> channels;
 	
 	public:
 	    Server();
 	    ~Server();
 	
+
+		void initServer(struct addrinfo &hints, struct addrinfo *res, const char *port);
 	    void start(const char *port, const char *pass);
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);
