@@ -34,21 +34,22 @@ int main(int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cerr << "Usage: " << argv[0] << " <port> <password>" << std::endl;
+        throw(std::runtime_error("Usage: ./irc <port> <password>"));
         return 1;
     }
     std::string password = argv[2];
 
     if (!validate(argv[1]))
     {
-        std::cerr << "Invalid port. Provide a numeric port in range 1024-65535." << std::endl;
+        throw(std::runtime_error("Invalid port. Provide a numeric port within range 1024-65535."));
         return 1;
     }
    
     
     try {
         Server server;
-        server.start(argv[1], argv[2]);
+
+        server.start(std::atoi(argv[1]), argv[2]);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

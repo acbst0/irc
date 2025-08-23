@@ -42,9 +42,11 @@ class Server {
 	    Server();
 	    ~Server();
 	
-
-		void initServer(struct addrinfo &hints, struct addrinfo *res, const char *port);
-	    void start(const char *port, const char *pass);
+		void commandParser(Client &client, std::string &message);
+		void handleClient(int index);
+		void initServer(struct sockaddr_in &hints, int port);
+	    void start(int port, const char *pass);
+	    void removeClient(int index);
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);
 };
