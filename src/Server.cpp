@@ -3,6 +3,7 @@
 Server::Server()
 {
 	this->serverFd = 0;
+	this->num_of_pfd = 0;
 }
 
 
@@ -68,9 +69,38 @@ void Server::start(const char *port, const char *pass)
 
 	std::cout << "IRC Server Has Been Running!" << std::endl;
 
+	this->pfds[0].fd = this->serverFd;
+	this->pfds[0].events = POLLIN;
+	this->num_of_pfd++;
 	while (true)
 	{
-		
+		if (poll(this->pfds, this->num_of_pfd, -1) < 0)
+			throw std::exception();
+
+		if (this->pfds[0].revents & POLLIN)
+		{
+			Client *cl = new Client;
+			socklen_t len = sizeof(cl->in_soc);
+
+			int client_fd = accept(this->serverFd, (struct sockaddr*)&(cl->in_soc), &len);
+			cl->setFd(client_fd);
+			if (client_fd >= 0)
+			{
+				setNonBlocking(cl->getFd());
+
+				this->pfds[this->num_of_pfd].fd = cl->getFd();
+				this->pfds[this->num_of_pfd].events = POLLIN;
+				this->num_of_pfd++;
+				this->clients.push_back(cl);
+				
+				std::string welcome = "Hello World!\n";
+				send(cl->getFd(), welcome.c_str(), welcome.size(), 0);
+
+				char ip[INET_ADDRSTRLEN];
+				inet_ntop(AF_INET, &cl->in_soc.sin_addr, ip, sizeof(ip));
+				std::cout << "New Connection : " << ip << std::endl;
+			}
+		}
 	}
 
 	close(this->serverFd);

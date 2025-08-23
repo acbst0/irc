@@ -21,11 +21,11 @@
 # include <cstdio>
 # include <cerrno>
 # include <exception>
+# include "Client.hpp"
 
 # define BACKLOG 10
 # define BUF_SIZE 1024
 
-//class Client;
 //class Channel;
 
 class Server {
@@ -33,7 +33,9 @@ class Server {
 	    //int port;
 	    //std::string password;
 	    int serverFd;
-	    //std::vector<Client*> clients;
+		struct pollfd pfds[BACKLOG + 1];
+		int num_of_pfd;
+	    std::vector<Client *> clients;
 	    //std::map<std::string, Channel*> channels;
 	
 	public:
