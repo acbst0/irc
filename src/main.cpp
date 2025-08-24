@@ -1,20 +1,55 @@
 #include "../include/Server.hpp"
+#include "../include/libs.h"
 //#include "../include/Client.hpp"
 //#include "../include/Channel.hpp"
 
-int main(int argc, char* argv[])
+
+bool validate(const std::string &portS)
 {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <port> <password>" << std::endl;
-        return 1;
+    if (portS.empty())
+        return false;
+    
+    for (unsigned char c : portS)
+    {
+        if (!std::isdigit(c))
+            return false;
     }
     
-    //int port = std::atoi(argv[1]);
-    //std::string password = argv[2];
+    errno = 0;
+    char *endptr = nullptr;
+    long val = std::strtol(portS.c_str(), &endptr, 10);
+    
+    if (errno == ERANGE)
+        return false;
+    if (endptr == portS.c_str() || *endptr != '\0')
+        return false;
+    if (val < 1024 || val > 65535)
+        return false;
+
+    return true;
+}
+
+
+int main(int argc, char* argv[])
+{
+    if (argc != 3)
+    {
+        throw(std::runtime_error("Usage: ./irc <port> <password>"));
+        return 1;
+    }
+    std::string password = argv[2];
+
+    if (!validate(argv[1]))
+    {
+        throw(std::runtime_error("Invalid port. Provide a numeric port within range 1024-65535."));
+        return 1;
+    }
+   
     
     try {
         Server server;
-        server.start(argv[1], argv[2]);
+
+        server.start(std::atoi(argv[1]), argv[2]);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;

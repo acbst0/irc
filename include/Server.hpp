@@ -32,17 +32,21 @@ class Server {
 	private:
 	    //int port;
 	    //std::string password;
+	    //std::map<std::string, Channel*> channels;
 	    int serverFd;
 		struct pollfd pfds[BACKLOG + 1];
 		int num_of_pfd;
 	    std::vector<Client *> clients;
-	    //std::map<std::string, Channel*> channels;
 	
 	public:
 	    Server();
 	    ~Server();
 	
-	    void start(const char *port, const char *pass);
+		void commandParser(Client &client, std::string &message);
+		void handleClient(int index);
+		void initServer(struct sockaddr_in &hints, int port);
+	    void start(int port, const char *pass);
+	    void removeClient(int index);
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);
 };
