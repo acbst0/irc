@@ -4,7 +4,9 @@
 
 //defines
 
-#define MAXCONN 100
+//#define MAXCONN 100
+// TODO fkuyumcu : Bu MAXCONN kullanımı gereksiz. Zaten server.hpp de tanımlı
+
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"
 #define RED     "\033[31m"
@@ -42,7 +44,7 @@
 #include <unistd.h>
 #include <utility>
 
-
+#include <vector>
 #include <iostream>
 #include <cstdlib>
 #include <cerrno>

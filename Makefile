@@ -1,6 +1,7 @@
 SRCS = src/main.cpp \
 		src/Server.cpp \
-		src/Client.cpp
+		src/Client.cpp \
+		src/Utils.cpp
 
 CXX = c++
 
@@ -21,3 +22,4 @@ clean:
 fclean : clean
 	$(RM) $(NAME)
 
+re: fclean all

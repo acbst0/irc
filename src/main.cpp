@@ -1,6 +1,6 @@
 #include "../include/Server.hpp"
-#include "../include/libs.h"
-//#include "../include/Client.hpp"
+#include "../include/libs.hpp"
+#include "../include/Client.hpp"
 //#include "../include/Channel.hpp"
 
 
@@ -34,14 +34,14 @@ int main(int argc, char* argv[])
 {
     if (argc != 3)
     {
-        throw(std::runtime_error("Usage: ./irc <port> <password>"));
+        std::cerr << "Usage: ./irc <port> <password>" << std::endl;
         return 1;
     }
     std::string password = argv[2];
 
     if (!validate(argv[1]))
     {
-        throw(std::runtime_error("Invalid port. Provide a numeric port within range 1024-65535."));
+		std::cerr << "Invalid port. Provide a numeric port within range 1024-65535." << std::endl;
         return 1;
     }
    

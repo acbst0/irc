@@ -84,12 +84,38 @@ void Server::commandParser(Client &client, std::string &message)
 {
 	std::cout << "Processing command from client " << client.getFd() << ": " << message << std::endl;
 	
-	// TODO: IRC command parsing
+	std::string cmd, trailing;
+	std::vector<std::string> params;
+	parseIrc(message, cmd, params, trailing);
+	if (cmd == "PASS")
+	{
+		if (params.empty())
+		{
+			enqueue(client.outbuf, ":server 461 * PASS :Not enough parameters\r\n");
+			return;
+		}
+		client.setAuth(params[0] == this->password);
+		enqueue(client.outbuf, client.getAuth() ? ":server NOTICE * :Password accepted\r\n"
+										: ":server 464 * :Password required/incorrect\r\n");
+		return;
+	}
+	else if (cmd == "NICK")
+	{
+
+	}
+	else if (cmd == "USER")
+	{
+
+	}
+	else if (cmd == "JOIN")
+	{
+
+	}
 }
 
 void Server::handleClient(int i)
 {
-	char buffer[1024];//buffer yönetimine bak
+	char buffer[BUF_SIZE];//buffer yönetimine bak
 	int bytes = recv(this->pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
 	if (bytes <= 0)
 	{
@@ -120,7 +146,7 @@ void Server::handleClient(int i)
 
 void Server::start(int port, const char *pass)
 {
-	(void)pass;
+	this->password = pass;
 
 	struct sockaddr_in hints;
 	initServer(hints, port);

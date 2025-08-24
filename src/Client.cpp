@@ -21,3 +21,17 @@ void Client::setFd(int _fd)
 {
 	this->fd = _fd;
 }
+
+bool Client::getAuth() { return this->is_authenticated; }
+
+void Client::setAuth(bool i) 
+{
+	this->is_authenticated = i;
+}
+
+bool Client::getRegis() { return this->is_registered; }
+
+void Client::setRegis(bool i)
+{
+	this->is_registered = i;
+}

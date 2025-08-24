@@ -31,7 +31,7 @@
 class Server {
 	private:
 	    //int port;
-	    //std::string password;
+	    std::string password;
 	    //std::map<std::string, Channel*> channels;
 	    int serverFd;
 		struct pollfd pfds[BACKLOG + 1];
@@ -50,5 +50,8 @@ class Server {
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);
 };
+
+void parseIrc(const std::string& line, std::string& cmd, std::vector<std::string>& params, std::string& trailing);
+void enqueue(std::string &outbuf, const std::string& line);
 
 #endif

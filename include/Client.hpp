@@ -7,25 +7,25 @@
 class Client {
 	private:
 	    int fd;
-	    //std::string nick;
-	    //std::string username;
-	    //std::string realname;
-	    //bool is_authenticated;
-	    //bool is_registered;
+	    std::string nick;
+	    std::string username;
+	    bool is_authenticated;
+	    bool is_registered;
 		
-	public:
+		public:
 		Client();
 	    Client(int _fd);
 	    ~Client();
 		
 		struct sockaddr_in in_soc;
+		std::string outbuf;
 
 	    int getFd();
 		void setFd(int _fd);
-	    //const std::string& getNickname();
-	    //void setNickname(const std::string& _nick);
-	    //bool isAuthenticated();
-	    //void setAuthenticated(bool _auth);
+		bool getAuth();
+		void setAuth(bool i);
+		bool getRegis();
+		void setRegis(bool i);
 	    //void sendMessage(const std::string& _message);
 };
 
