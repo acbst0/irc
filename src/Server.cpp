@@ -183,7 +183,7 @@ void Server::start(int port, const char *pass)
 				setNonBlocking(cl->getFd());
 
 				this->pfds[this->num_of_pfd].fd = cl->getFd();
-				this->pfds[this->num_of_pfd].events = POLLIN;
+				this->pfds[this->num_of_pfd].events = POLLIN | POLLOUT;
 				this->num_of_pfd++;
 				this->clients.push_back(cl);
 				
@@ -199,8 +199,32 @@ void Server::start(int port, const char *pass)
 		// surekli pollfdnin icindeki clientler veri gonderiyor mu onu kontrol et
 		for (int i = 1; i < this->num_of_pfd; i++)
 		{
-			if (this->pfds[i].revents & POLLIN)
+			if (this->pfds[i].revents & POLLIN)// girdi durumunda clientleri ayarlıyor
 				handleClient(i);
+			if (this->pfds[i].revents & POLLOUT)// çıktı durumunda clientleri ayarlıyor
+			{
+				// Send pending output
+				for (size_t j = 0; j < clients.size(); j++)
+				{
+					if (clients[j]->getFd() == pfds[i].fd && !clients[j]->outbuf.empty())
+					{
+						int sent = send(pfds[i].fd, clients[j]->outbuf.c_str(), clients[j]->outbuf.size(), 0);
+						if (sent > 0)
+						{
+							clients[j]->outbuf.erase(0, sent);
+						}
+						else if (sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+						{
+							std::cout << "Send error: " << strerror(errno) << std::endl;
+							close(pfds[i].fd);
+							removeClient(i);
+							i--; // Adjust index since we removed an element
+							break;
+						}
+						break;
+					}
+				}
+			}
 		}
 	}
 	close(this->serverFd);
