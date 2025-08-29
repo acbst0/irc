@@ -117,7 +117,21 @@ void Server::handleClient(int i)
 {
 	char buffer[BUF_SIZE];//buffer yönetimine bak
 	int bytes = recv(this->pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
-	if (bytes <= 0)
+	if (bytes < 0)
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK)//bunun sayesinde halletti
+		{
+			return;
+		}
+		else
+		{
+			std::cout << "Client disconnected with error: " << strerror(errno) << std::endl;
+			close(this->pfds[i].fd);
+			removeClient(i);
+			return;
+		}
+	}
+	else if (bytes == 0)
 	{
 		std::cout << "Client disconnected" << std::endl;
 		close(this->pfds[i].fd);
