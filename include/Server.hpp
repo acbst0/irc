@@ -30,7 +30,7 @@
 
 class Server {
 	private:
-	    //int port;
+	    int port;
 	    std::string password;
 	    //std::map<std::string, Channel*> channels;
 	    int serverFd;
@@ -44,9 +44,12 @@ class Server {
 	
 		void commandParser(Client &client, std::string &message);
 		void handleClient(int index);
+		bool handleClientPollout(int index);
 		void initServer(struct sockaddr_in &hints, int port);
 	    void start(int port, const char *pass);
 	    void removeClient(int index);
+		void commandHandler(std::string cmd, std::vector<std::string> params, Client &client);
+		
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);
 };

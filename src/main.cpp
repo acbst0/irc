@@ -32,6 +32,7 @@ bool validate(const std::string &portS)
 
 int main(int argc, char* argv[])
 {
+    //MAKEFILE relink yapıyor
     if (argc != 3)
     {
         std::cerr << "Usage: ./irc <port> <password>" << std::endl;

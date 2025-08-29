@@ -80,6 +80,46 @@ void Server::removeClient(int index)
 	num_of_pfd--;
 }
 
+void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
+{
+	if(cmd == "PASS")
+	{
+		if (params.empty())
+		{
+			enqueue(client.outbuf, ":server 461 * PASS :Not enough parameters\r\n");
+			return;
+		}
+		if (client.getAuth())
+		{
+			enqueue(client.outbuf, ":server 462 * :You may not reregister\r\n");
+			return;
+		}
+		client.setAuth(params[0] == this->password);
+		enqueue(client.outbuf, client.getAuth() ? ":server 001 * :Password accepted\r\n"
+										: ":server 464 * :Password incorrect\r\n");
+		return;
+	}
+	if(!client.getAuth())
+		enqueue(client.outbuf, ":server 421 * : Please enter the PASS command\r\n");
+	else
+	{
+		if (cmd == "NICK")
+		{
+	
+		}
+		else if (cmd == "USER")
+		{
+	
+		}
+		else if (cmd == "JOIN")
+		{
+	
+		}
+		else 
+			 enqueue(client.outbuf, ":server 421 * " + cmd + " :Unknown command\r\n");
+	}
+}
+
 void Server::commandParser(Client &client, std::string &message)
 {
 	std::cout << "Processing command from client " << client.getFd() << ": " << message << std::endl;
@@ -87,30 +127,11 @@ void Server::commandParser(Client &client, std::string &message)
 	std::string cmd, trailing;
 	std::vector<std::string> params;
 	parseIrc(message, cmd, params, trailing);
-	if (cmd == "PASS")
-	{
-		if (params.empty())
-		{
-			enqueue(client.outbuf, ":server 461 * PASS :Not enough parameters\r\n");
-			return;
-		}
-		client.setAuth(params[0] == this->password);
-		enqueue(client.outbuf, client.getAuth() ? ":server NOTICE * :Password accepted\r\n"
-										: ":server 464 * :Password required/incorrect\r\n");
-		return;
-	}
-	else if (cmd == "NICK")
-	{
+	
+	commandHandler(cmd, params, client);
 
-	}
-	else if (cmd == "USER")
-	{
 
-	}
-	else if (cmd == "JOIN")
-	{
-
-	}
+	
 }
 
 void Server::handleClient(int i)
@@ -157,6 +178,30 @@ void Server::handleClient(int i)
 
 }
 
+bool Server::handleClientPollout(int i)
+{
+	for (size_t j = 0; j < clients.size(); j++)
+	{
+		if (clients[j]->getFd() == pfds[i].fd && !clients[j]->outbuf.empty())
+		{
+			int sent = send(pfds[i].fd, clients[j]->outbuf.c_str(), clients[j]->outbuf.size(), 0);
+			if (sent > 0)
+			{
+				clients[j]->outbuf.erase(0, sent);
+			}
+			else if (sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+			{
+				std::cout << "Send error: " << strerror(errno) << std::endl;
+				close(pfds[i].fd);
+				removeClient(i);
+				return true; // removed
+			}
+			break;
+		}
+	}
+	return false;
+}
+
 
 void Server::start(int port, const char *pass)
 {
@@ -183,7 +228,7 @@ void Server::start(int port, const char *pass)
 				setNonBlocking(cl->getFd());
 
 				this->pfds[this->num_of_pfd].fd = cl->getFd();
-				this->pfds[this->num_of_pfd].events = POLLIN | POLLOUT;
+				this->pfds[this->num_of_pfd].events = POLLIN | POLLOUT;//pollout durumuna da baktı
 				this->num_of_pfd++;
 				this->clients.push_back(cl);
 				
@@ -203,27 +248,9 @@ void Server::start(int port, const char *pass)
 				handleClient(i);
 			if (this->pfds[i].revents & POLLOUT)// çıktı durumunda clientleri ayarlıyor
 			{
-				// Send pending output
-				for (size_t j = 0; j < clients.size(); j++)
-				{
-					if (clients[j]->getFd() == pfds[i].fd && !clients[j]->outbuf.empty())
-					{
-						int sent = send(pfds[i].fd, clients[j]->outbuf.c_str(), clients[j]->outbuf.size(), 0);
-						if (sent > 0)
-						{
-							clients[j]->outbuf.erase(0, sent);
-						}
-						else if (sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-						{
-							std::cout << "Send error: " << strerror(errno) << std::endl;
-							close(pfds[i].fd);
-							removeClient(i);
-							i--; // Adjust index since we removed an element
-							break;
-						}
-						break;
-					}
-				}
+				// kullanıcıya not; true döndürdüğü zaman clientın kaldırıldığı anlaşılmalı, buna göre i düzenlenmeli
+				if (handleClientPollout(i))
+					i--;
 			}
 		}
 	}
