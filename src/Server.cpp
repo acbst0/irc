@@ -119,7 +119,10 @@ void Server::handleClient(int i)
 	int bytes = recv(this->pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
 	if (bytes <= 0)
 	{
-		std::cout << "Client disconnected" << std::endl;
+		if (bytes == 0)
+			std::cout << "Client disconnected normally" << std::endl;
+		else
+			std::cout << "Client disconnected with error: " << strerror(errno) << std::endl;
 		close(this->pfds[i].fd);
 		removeClient(i);
 		return;
@@ -141,6 +144,19 @@ void Server::handleClient(int i)
 		}
 	}
 
+	// Send any pending output
+	for (size_t j = 0; j < clients.size(); j++)
+	{
+		if (clients[j]->getFd() == pfds[i].fd && !clients[j]->outbuf.empty())
+		{
+			int sent = send(pfds[i].fd, clients[j]->outbuf.c_str(), clients[j]->outbuf.size(), 0);
+			if (sent > 0)
+			{
+				clients[j]->outbuf.erase(0, sent);
+			}
+			break;
+		}
+	}
 }
 
 
@@ -169,7 +185,7 @@ void Server::start(int port, const char *pass)
 				setNonBlocking(cl->getFd());
 
 				this->pfds[this->num_of_pfd].fd = cl->getFd();
-				this->pfds[this->num_of_pfd].events = POLLIN;
+				this->pfds[this->num_of_pfd].events = POLLIN | POLLOUT;
 				this->num_of_pfd++;
 				this->clients.push_back(cl);
 				
@@ -187,6 +203,30 @@ void Server::start(int port, const char *pass)
 		{
 			if (this->pfds[i].revents & POLLIN)
 				handleClient(i);
+			if (this->pfds[i].revents & POLLOUT)
+			{
+				// Send pending output
+				for (size_t j = 0; j < clients.size(); j++)
+				{
+					if (clients[j]->getFd() == pfds[i].fd && !clients[j]->outbuf.empty())
+					{
+						int sent = send(pfds[i].fd, clients[j]->outbuf.c_str(), clients[j]->outbuf.size(), 0);
+						if (sent > 0)
+						{
+							clients[j]->outbuf.erase(0, sent);
+						}
+						else if (sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+						{
+							std::cout << "Send error: " << strerror(errno) << std::endl;
+							close(pfds[i].fd);
+							removeClient(i);
+							i--; // Adjust index since we removed an element
+							break;
+						}
+						break;
+					}
+				}
+			}
 		}
 	}
 	close(this->serverFd);
