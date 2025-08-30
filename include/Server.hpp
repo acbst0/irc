@@ -37,7 +37,8 @@ class Server {
 		struct pollfd pfds[BACKLOG + 1];
 		int num_of_pfd;
 	    std::vector<Client *> clients;
-	
+		std::map<std::string, Client *> clientsByNick;
+		
 	public:
 	    Server();
 	    ~Server();

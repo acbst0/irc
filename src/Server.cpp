@@ -101,15 +101,69 @@ void Server::commandParser(Client &client, std::string &message)
 	}
 	else if (cmd == "NICK")
 	{
-
+	    if (params.empty()) {
+	        enqueue(client.outbuf, ":server 431 * :No nickname given\r\n"); // ERR_NONICKNAMEGIVEN
+	        return;
+	    }
+	    std::string nick = params[0];
+	
+	    // Çakışma kontrolü (örnek: basit map<string,Client*> ile)
+	    if (this->clientsByNick.count(nick)) {
+	        enqueue(client.outbuf, ":server 433 * " + nick + " :Nickname is already in use\r\n"); // ERR_NICKNAMEINUSE
+	        return;
+	    }
+	
+	    client.setNick(nick);
+	    this->clientsByNick[nick] = &client;
+	    enqueue(client.outbuf, ":server NOTICE * :Nickname set to " + nick + "\r\n");
+	    return;
 	}
 	else if (cmd == "USER")
 	{
-
+	    if (params.size() < 4) {
+	        enqueue(client.outbuf, ":server 461 * USER :Not enough parameters\r\n"); // ERR_NEEDMOREPARAMS
+	        return;
+	    }
+	
+	    // USER <username> <hostname> <servername> :<realname>
+	    std::string username = params[0];
+	    std::string realname = trailing.empty() ? params.back() : trailing;
+	
+	    client.setUsername(username);
+	    client.setRealname(realname);
+	
+	    enqueue(client.outbuf, ":server NOTICE * :User registered as " + username + "\r\n");
+	    return;
 	}
 	else if (cmd == "JOIN")
 	{
 
+	}
+	else if (cmd == "QUIT")
+	{
+	    std::string quitMsg;
+	    if (!trailing.empty())
+	        quitMsg = trailing;
+	    else if (!params.empty())
+	        quitMsg = params[0];
+	    else
+	        quitMsg = "Client Quit";
+
+	    // Başka kullanıcılara bildir (örnek: sadece kendi nickini gösterelim)
+	    std::string fullMsg = ":" + client.getNick() + " QUIT :" + quitMsg + "\r\n";
+	    for (std::vector<Client *>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+		{
+			Client *other = *it;
+        	if (other && other->getFd() != client.getFd())
+        	{
+        	    enqueue(other->outbuf, fullMsg);
+        	}
+	    }
+
+	    // Bu client'a da bilgi gönder (opsiyonel)
+	    enqueue(client.outbuf, ":server NOTICE * :Goodbye!\r\n");
+		close(client.getFd());
+	    return;
 	}
 }
 
@@ -133,7 +187,6 @@ void Server::handleClient(int i)
 		std::string message(buffer);
 		std::cout << "Received: " << buffer << std::endl;
 		
-		// search for client and pass it to command parser
 		for (size_t j = 0; j < clients.size(); j++)
 		{
 			if (clients[j]->getFd() == pfds[i].fd)
@@ -158,7 +211,6 @@ void Server::handleClient(int i)
 		}
 	}
 }
-
 
 void Server::start(int port, const char *pass)
 {

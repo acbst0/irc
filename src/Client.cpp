@@ -35,3 +35,28 @@ void Client::setRegis(bool i)
 {
 	this->is_registered = i;
 }
+
+void Client::setNick(std::string str)
+{
+	this->nick = str;
+}
+
+std::string Client::getNick()
+{
+	return this->nick;
+}
+
+void Client::setUsername(std::string str)
+{
+	this->username = str;
+}
+
+std::string Client::getUsername()
+{
+	return this->username;
+}
+
+void Client::setRealname(std::string str)
+{
+	this->realname = str;
+}
