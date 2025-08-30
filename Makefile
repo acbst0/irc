@@ -1,7 +1,8 @@
 SRCS = src/main.cpp \
 		src/Server.cpp \
 		src/Client.cpp \
-		src/Utils.cpp
+		src/Utils.cpp \
+		src/cmdHandler.cpp
 
 CXX = c++
 

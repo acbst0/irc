@@ -3,6 +3,9 @@
 Client::Client() 
 {
 	this->fd = 0;
+	this->is_authenticated = false;
+	this->nick = "";
+	this->username = "";
 }
 
 Client::Client(int _fd)
@@ -22,16 +25,21 @@ void Client::setFd(int _fd)
 	this->fd = _fd;
 }
 
+
+
+
+
+
 bool Client::getAuth() { return this->is_authenticated; }
-
-void Client::setAuth(bool i) 
-{
-	this->is_authenticated = i;
-}
-
+void Client::setAuth(bool i) {this->is_authenticated = i;}
 bool Client::getRegis() { return this->is_registered; }
+void Client::setRegis(bool i) {this->is_registered = i;}
 
-void Client::setRegis(bool i)
-{
-	this->is_registered = i;
-}
+std::string Client::getNick(void){return this->nick;}
+std::string Client::getUname(void){return this->username;}
+void Client::setNick(std::string nick){this->nick = nick;}
+void Client::setUname(std::string username){this->username = username;}
+
+
+
+

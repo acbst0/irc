@@ -80,45 +80,7 @@ void Server::removeClient(int index)
 	num_of_pfd--;
 }
 
-void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
-{
-	if(cmd == "PASS")
-	{
-		if (params.empty())
-		{
-			enqueue(client.outbuf, ":server 461 * PASS :Not enough parameters\r\n");
-			return;
-		}
-		if (client.getAuth())
-		{
-			enqueue(client.outbuf, ":server 462 * :You may not reregister\r\n");
-			return;
-		}
-		client.setAuth(params[0] == this->password);
-		enqueue(client.outbuf, client.getAuth() ? ":server 001 * :Password accepted\r\n"
-										: ":server 464 * :Password incorrect\r\n");
-		return;
-	}
-	if(!client.getAuth())
-		enqueue(client.outbuf, ":server 421 * : Please enter the PASS command\r\n");
-	else
-	{
-		if (cmd == "NICK")
-		{
-	
-		}
-		else if (cmd == "USER")
-		{
-	
-		}
-		else if (cmd == "JOIN")
-		{
-	
-		}
-		else 
-			 enqueue(client.outbuf, ":server 421 * " + cmd + " :Unknown command\r\n");
-	}
-}
+
 
 void Server::commandParser(Client &client, std::string &message)
 {
@@ -127,11 +89,8 @@ void Server::commandParser(Client &client, std::string &message)
 	std::string cmd, trailing;
 	std::vector<std::string> params;
 	parseIrc(message, cmd, params, trailing);
-	
 	commandHandler(cmd, params, client);
 
-
-	
 }
 
 void Server::handleClient(int i)

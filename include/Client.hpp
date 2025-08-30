@@ -26,6 +26,11 @@ class Client {
 		void setAuth(bool i);
 		bool getRegis();
 		void setRegis(bool i);
+		std::string getNick();
+		std::string getUname();
+		void setNick(std::string nick);
+		void setUname(std::string username);
+
 	    //void sendMessage(const std::string& _message);
 };
 
