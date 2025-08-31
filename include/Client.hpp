@@ -9,6 +9,8 @@ class Client {
 	    int fd;
 	    std::string nick;
 	    std::string username;
+		std::string realname;
+		std::string hostname;
 	    bool is_authenticated;
 	    bool is_registered;
 		
@@ -27,11 +29,14 @@ class Client {
 		bool getRegis();
 		void setRegis(bool i);
 		std::string getNick();
+		std::string getRname();
 		std::string getUname();
+		std::string getHname();
 		void setNick(std::string nick);
 		void setUname(std::string username);
+		void setRname(std::string realname);
+		void setHname(std::string hostname);
 
-	    //void sendMessage(const std::string& _message);
 };
 
 #endif

@@ -21,6 +21,8 @@
 # include <cstdio>
 # include <cerrno>
 # include <exception>
+# include <algorithm>
+# include <cctype>
 # include "Client.hpp"
 
 # define BACKLOG 10
@@ -49,6 +51,9 @@ class Server {
 	    void start(int port, const char *pass);
 	    void removeClient(int index);
 		void commandHandler(std::string cmd, std::vector<std::string> params, Client &client);
+		void checkRegistration(Client &client);
+		bool nicknameCheck(std::string nickname);
+		
 		
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);

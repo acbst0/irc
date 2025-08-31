@@ -89,8 +89,13 @@ void Server::commandParser(Client &client, std::string &message)
 	std::string cmd, trailing;
 	std::vector<std::string> params;
 	parseIrc(message, cmd, params, trailing);
+	
+	// Trailing parametresi varsa params'a ekle
+	if (!trailing.empty()) {
+		params.push_back(trailing);
+	}
+	
 	commandHandler(cmd, params, client);
-
 }
 
 void Server::handleClient(int i)

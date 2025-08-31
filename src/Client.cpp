@@ -37,8 +37,13 @@ void Client::setRegis(bool i) {this->is_registered = i;}
 
 std::string Client::getNick(void){return this->nick;}
 std::string Client::getUname(void){return this->username;}
+std::string Client::getRname(void){return this->realname;}
+std::string Client::getHname(void){return this->hostname;}
+
 void Client::setNick(std::string nick){this->nick = nick;}
 void Client::setUname(std::string username){this->username = username;}
+void Client::setHname(std::string hostname){this->hostname = hostname;}
+void Client::setRname(std::string realname){this->realname = realname;}
 
 
 
