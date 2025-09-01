@@ -24,6 +24,7 @@
 # include <algorithm>
 # include <cctype>
 # include "Client.hpp"
+# include "Channel.hpp"
 
 # define BACKLOG 10
 # define BUF_SIZE 1024
@@ -34,7 +35,7 @@ class Server {
 	private:
 	    int port;
 	    std::string password;
-	    //std::map<std::string, Channel*> channels;
+	    std::map<std::string, Channel*> channels;
 	    int serverFd;
 		struct pollfd pfds[BACKLOG + 1];
 		int num_of_pfd;
@@ -53,6 +54,7 @@ class Server {
 		void commandHandler(std::string cmd, std::vector<std::string> params, Client &client);
 		void checkRegistration(Client &client);
 		bool nicknameCheck(std::string nickname);
+		void handleJoin(const std::vector<std::string>& params, Client &client);
 		
 		
 	    //void acceptClient();

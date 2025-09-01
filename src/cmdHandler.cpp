@@ -53,13 +53,13 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         {
             enqueue(client.outbuf, ":server 464 * :Password incorrect\r\n");
         }
-        return;
+        return ;
     }
     
     if(!client.getAuth())
     {
         enqueue(client.outbuf, ":server 464 * :Password incorrect\r\n");
-        return;
+        return ;
     }
     
     if (cmd == "NICK")
@@ -126,18 +126,21 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         enqueue(client.outbuf, ":server 451 * :You have not registered\r\n");
         return ;
     }
-    // Kayıtlı kullanıcılar için diğer komutlar
+
+
     else if (cmd == "JOIN")
     {
-        enqueue(client.outbuf, ":server 421 * JOIN :Not implemented yet\r\n");
+        handleJoin(params, client);
     }
-    else if (cmd == "PART")
-    {
-        enqueue(client.outbuf, ":server 421 * PART :Not implemented yet\r\n");
-    }
+
     else if (cmd == "PRIVMSG")
     {
         enqueue(client.outbuf, ":server 421 * PRIVMSG :Not implemented yet\r\n");
+    }
+
+    else if (cmd == "PART")
+    {
+        enqueue(client.outbuf, ":server 421 * PART :Not implemented yet\r\n");
     }
     else if (cmd == "NOTICE")
     {
@@ -186,7 +189,6 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
             enqueue(client.outbuf, ":server 409 * :No origin specified\r\n");
             return;
         }
-        // PING'e PONG ile cevap ver
         enqueue(client.outbuf, ":server PONG server :" + params[0] + "\r\n");
     }
     else if (cmd == "PONG")
@@ -198,5 +200,3 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         enqueue(client.outbuf, ":server 421 * " + cmd + " :Unknown command\r\n");
     }
 }
-
-// Ayrı fonksiyon olarak kayıt kontrolü

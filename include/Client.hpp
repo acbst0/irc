@@ -20,7 +20,7 @@ class Client {
 	    ~Client();
 		
 		struct sockaddr_in in_soc;
-		std::string outbuf;
+		std::string outbuf;//output bufferı
 
 	    int getFd();
 		void setFd(int _fd);
