@@ -30,8 +30,6 @@ bool Server::nicknameCheck(std::string nickname)
     return true;
 }
 
-
-
 void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
 {
     if(cmd == "PASS")
@@ -135,7 +133,7 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
 
     else if (cmd == "PRIVMSG")
     {
-        enqueue(client.outbuf, ":server 421 * PRIVMSG :Not implemented yet\r\n");
+        handlePrivMsg(params, client);
     }
 
     else if (cmd == "PART")
@@ -193,7 +191,7 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
     }
     else if (cmd == "PONG")
     {
-        // PONG komutunu sessizce kabul et (keepalive için)
+        // PONG komutunu sessizce kabul et
     }
     else 
     {

@@ -101,7 +101,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             continue;
         }
         
-        // JOIN başarılı - mesajları gönder
         std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
         std::string joinMsg = ":" + userMask + " JOIN " + channelName + "\r\n";
         
@@ -118,7 +117,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             enqueue(client.outbuf, ":server 331 " + client.getNick() + " " + channelName + " :No topic is set\r\n");
         }
         
-        // kanal kullanıcı listesini göster
         std::string namesList = "";
         std::vector<Client*> members = targetChannel->getMembers();
         for (std::vector<Client*>::iterator memberIt = members.begin(); memberIt != members.end(); ++memberIt)
@@ -126,7 +124,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             if (!namesList.empty())
                 namesList += " ";
             
-            // operatörğn başına @ ekle
+            // operatörün başına @ ekle
             if (targetChannel->isOperator(*memberIt))
                 namesList += "@";
             

@@ -13,8 +13,6 @@ Server::~Server()
     
 }
 
-
-
 void setNonBlocking(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);

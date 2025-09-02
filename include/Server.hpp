@@ -35,9 +35,9 @@ class Server {
 	private:
 	    int port;
 	    std::string password;
-	    std::map<std::string, Channel*> channels;
+	    std::map<std::string, Channel*> channels;//map içinde arama yapılabilir
 	    int serverFd;
-		struct pollfd pfds[BACKLOG + 1];
+		struct pollfd pfds[BACKLOG + 1];//pollfd sayısı artırılabilir
 		int num_of_pfd;
 	    std::vector<Client *> clients;
 	
@@ -55,6 +55,7 @@ class Server {
 		void checkRegistration(Client &client);
 		bool nicknameCheck(std::string nickname);
 		void handleJoin(const std::vector<std::string>& params, Client &client);
+		void handlePrivMsg(const std::vector<std::string>& params, Client &client);
 		
 		
 	    //void acceptClient();
