@@ -3,14 +3,24 @@
 
 void Server::handlePrivMsg(const std::vector<std::string>& params, Client &client)
 {
-    if (params.size() < 2)
+    if (params.size() < 1)
     {
-        enqueue(client.outbuf, ":server 411 " + client.getNick() + " :No recipient given PRIVMSG\r\n");
+        enqueue(client.outbuf, ":server 411 " + client.getNick() + " :No recipient given (PRIVMSG)\r\n");
         return;
     }
     
-    std::string target = params[0];
-    std::string message = params[1];
+    std::string target = params[0];    
+    std::string message;
+
+    //ikiden fazla parametre varsa cümle olarak mesaj gelmiştir. mesajı birleştir.
+    if (params.size() >= 2)
+    {
+        for (size_t i = 1; i < params.size(); ++i)
+        {
+            if (i > 1) message += " ";
+            message += params[i];
+        }
+    }
     
     if (message.empty())
     {
@@ -18,50 +28,71 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
         return;
     }
     
-    std::string uMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
-    std::string privmsgLine = ":" + uMask + " PRIVMSG " + target + " :" + message + "\r\n";
-    
-    if (target[0] == '#' || target[0] == '&')
+    std::vector<std::string> targetList;
+    std::stringstream targetStream(target);
+    std::string target;
+    while (std::getline(targetStream, target, ','))
     {
-        std::map<std::string, Channel*>::iterator channelIt = this->channels.find(target);// map içerisinde elmente göre arama yaptırılıyor
-        Channel* targetChannel = channelIt->second;
-       
-        if (!targetChannel->hasClient(&client))
-        {
-            enqueue(client.outbuf, ":server 404 " + client.getNick() + " " + target + " :Cannot send to channel\r\n");
-            return;
-        }
-
-        if (channelIt == this->channels.end())
-        {
-            enqueue(client.outbuf, ":server 403 " + client.getNick() + " " + target + " :No such channel\r\n");
-            return;
-        }
-        targetChannel->sendMsg(privmsgLine, &client);
+        if (!target.empty())
+            targetList.push_back(target);
     }
 
-    else
+    //targetlar virgülle ayrılmışsa
+    
+    std::string uMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
+    
+    for (std::vector<std::string>::iterator targetIt = targetList.begin(); 
+         targetIt != targetList.end(); ++targetIt)
     {
-        Client* targetClient = nullptr;
+        std::string currentTarget = *targetIt;
+        std::string privmsgLine = ":" + uMask + " PRIVMSG " + currentTarget + " :" + message + "\r\n";
         
-        
-        
-        for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+        if (currentTarget[0] == '#' || currentTarget[0] == '&')
         {
-            if ((*it)->getNick() == target)
+            std::map<std::string, Channel*>::iterator channelIt = this->channels.find(currentTarget);
+            
+            if (channelIt == this->channels.end())
             {
-                targetClient = *it;
-                break ;
+                enqueue(client.outbuf, ":server 403 " + client.getNick() + " " + currentTarget + " :No such channel\r\n");
+                continue;
             }
-        }
-        
-        if (targetClient == nullptr)
-        {
-            enqueue(client.outbuf, ":server 401 " + client.getNick() + " " + target + " :No such nick/channel\r\n");
-            return;
-        }
+            
+            Channel* targetChannel = channelIt->second;
+           
+            if (!targetChannel->hasClient(&client))
+            {
+                enqueue(client.outbuf, ":server 404 " + client.getNick() + " " + currentTarget + " :Cannot send to channel\r\n");
+                continue;
+            }
 
-        enqueue(targetClient->outbuf, privmsgLine);
+            targetChannel->sendMsg(privmsgLine, &client);
+        }
+        else
+        {
+            // Özel mesaj
+            Client* targetClient = nullptr;
+            
+            for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+            {
+                if ((*it)->getNick() == currentTarget)
+                {
+                    targetClient = *it;
+                    break;
+                }
+            }
+            
+            if (targetClient == nullptr)
+            {
+                enqueue(client.outbuf, ":server 401 " + client.getNick() + " " + currentTarget + " :No such nick/channel\r\n");
+                continue;
+            }
+
+            // TODO: Away durumu kontrolü
+            // if (targetClient->isAway())
+            //     enqueue(client.outbuf, ":server 301 " + client.getNick() + " " + currentTarget + " :" + targetClient->getAwayMessage() + "\r\n");
+
+            enqueue(targetClient->outbuf, privmsgLine);
+        }
     }
 }
 
