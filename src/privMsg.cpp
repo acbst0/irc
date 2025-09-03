@@ -30,7 +30,7 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
     
     std::vector<std::string> targetList;
     std::stringstream targetStream(target);
-    std::string target;
+
     while (std::getline(targetStream, target, ','))
     {
         if (!target.empty())
@@ -67,10 +67,12 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
 
             targetChannel->sendMsg(privmsgLine, &client);
         }
+
+        
         else
         {
             // Özel mesaj
-            Client* targetClient = nullptr;
+            Client* targetClient = NULL;
             
             for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
             {
@@ -81,7 +83,7 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
                 }
             }
             
-            if (targetClient == nullptr)
+            if (targetClient == NULL)
             {
                 enqueue(client.outbuf, ":server 401 " + client.getNick() + " " + currentTarget + " :No such nick/channel\r\n");
                 continue;

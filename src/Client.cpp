@@ -4,6 +4,7 @@ Client::Client()
 {
 	this->fd = 0;
 	this->is_authenticated = false;
+	this->is_registered = false;
 	this->nick = "";
 	this->username = "";
 }
@@ -11,6 +12,10 @@ Client::Client()
 Client::Client(int _fd)
 {
 	this->fd = _fd;
+	this->is_authenticated = false;
+	this->is_registered = false;
+	this->nick = "";
+	this->username = "";
 }
 
 Client::~Client() {}

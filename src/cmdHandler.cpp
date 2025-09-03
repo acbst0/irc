@@ -86,6 +86,8 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         
         checkRegistration(client);
     }
+    
+    
     else if (cmd == "USER")
     {
         if (params.size() < 4)

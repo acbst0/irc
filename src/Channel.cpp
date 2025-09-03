@@ -36,7 +36,6 @@ bool Channel::addClient(Client* client, const std::string& providedKey)
 
 void Channel::removeClient(Client* client)
 {
-    // Members listesinden çıkar
     for (std::vector<Client*>::iterator it = members.begin(); it != members.end(); ++it)
     {
         if (*it == client)
@@ -46,7 +45,6 @@ void Channel::removeClient(Client* client)
         }
     }
     
-    // Operators listesinden çıkar
     for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); ++it)
     {
         if (*it == client)

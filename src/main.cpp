@@ -2,21 +2,22 @@
 #include "../include/libs.hpp"
 #include "../include/Client.hpp"
 //#include "../include/Channel.hpp"
-
+#include <stdlib.h>
+#include <unistd.h>
 
 bool validate(const std::string &portS)
 {
     if (portS.empty())
         return false;
     
-    for (unsigned char c : portS)
+    for (size_t i = 0; i < portS.size(); ++i)
     {
-        if (!std::isdigit(c))
+        if (!std::isdigit(static_cast<unsigned char>(portS[i])))
             return false;
     }
     
     errno = 0;
-    char *endptr = nullptr;
+    char *endptr = NULL;
     long val = std::strtol(portS.c_str(), &endptr, 10);
     
     if (errno == ERANGE)

@@ -8,11 +8,11 @@ SRCS = src/main.cpp \
 		src/privMsg.cpp 
 
 
-CXX = c++
+CXX = c++ 
 
 RM = rm -rf
 
-#FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -std=c++98
 
 NAME = irc
 

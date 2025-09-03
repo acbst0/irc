@@ -14,8 +14,8 @@ void parseIrc(const std::string& line, std::string& cmd, std::vector<std::string
 {
     std::string s = line;
     
-    // bu kısım olmadan if içerisine girmiyor komut. düzeltildi
     size_t end = s.find_last_not_of(" \t\r\n");
+
     if (end != std::string::npos) {
         s = s.substr(0, end + 1);
     } else {

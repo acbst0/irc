@@ -37,7 +37,7 @@ public:
     void addOperator(Client* client);
     size_t getMemberCount() const;
     
-    void sendMsg(const std::string& message, Client* sender = nullptr);
+    void sendMsg(const std::string& message, Client* sender = NULL);
     
     bool isInviteOnly() const;
     void setInviteOnly(bool value);

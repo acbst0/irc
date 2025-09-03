@@ -70,7 +70,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         }
         
         // kanal yoksa oluştur
-        Channel* targetChannel = nullptr;
+        Channel* targetChannel = NULL;
         std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
         
         if (channelIt == this->channels.end())
@@ -105,7 +105,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         std::string joinMsg = ":" + userMask + " JOIN " + channelName + "\r\n";
         
         // Kanaldaki herkese JOIN mesajı gönder
-        targetChannel->sendMsg(joinMsg, nullptr);
+        targetChannel->sendMsg(joinMsg, NULL);
         enqueue(client.outbuf, joinMsg);
         
         if (!targetChannel->getTopic().empty())
