@@ -41,3 +41,11 @@ void enqueue(std::string &outbuf, const std::string& line)
     outbuf += line;
     if (outbuf.size() > 1<<20) outbuf.erase(0, outbuf.size() - (1<<20));
 }
+
+// To_string fonksiyonu C++11 ile geldiği için kendi fonksiyonumuzu yazdım
+std::string to_string(int number)
+{
+	std::ostringstream oss;
+	oss << number;
+	return oss.str();
+}

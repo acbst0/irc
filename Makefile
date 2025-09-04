@@ -5,7 +5,10 @@ SRCS = src/main.cpp \
 		src/cmdHandler.cpp \
 		src/join.cpp \
 		src/Channel.cpp \
-		src/privMsg.cpp 
+		src/privMsg.cpp \
+		src/notice.cpp \
+		src/quit.cpp \
+		src/channelCommands.cpp
 
 
 CXX = c++ 

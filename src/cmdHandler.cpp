@@ -140,47 +140,57 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
 
     else if (cmd == "PART")
     {
-        enqueue(client.outbuf, ":server 421 * PART :Not implemented yet\r\n");
+		handlePart(params, client);
     }
     else if (cmd == "NOTICE")
     {
-        enqueue(client.outbuf, ":server 421 * NOTICE :Not implemented yet\r\n");
+		handleNotice(params, client);
+        //enqueue(client.outbuf, ":server 421 * NOTICE :Not implemented yet\r\n");
     }
     else if (cmd == "QUIT")
     {
-        enqueue(client.outbuf, ":server 421 * QUIT :Not implemented yet\r\n");
+		handleQuit(params, client);
+        //enqueue(client.outbuf, ":server 421 * QUIT :Not implemented yet\r\n");
     }
     else if (cmd == "MODE")
     {
-        enqueue(client.outbuf, ":server 421 * MODE :Not implemented yet\r\n");
+		handleMode(params, client);
+        // enqueue(client.outbuf, ":server 421 * MODE :Not implemented yet\r\n");
     }
     else if (cmd == "TOPIC")
     {
-        enqueue(client.outbuf, ":server 421 * TOPIC :Not implemented yet\r\n");
+		handleTopic(params, client);
+        // enqueue(client.outbuf, ":server 421 * TOPIC :Not implemented yet\r\n");
     }
     else if (cmd == "NAMES")
     {
-        enqueue(client.outbuf, ":server 421 * NAMES :Not implemented yet\r\n");
+		handleName(params, client);
+        // enqueue(client.outbuf, ":server 421 * NAMES :Not implemented yet\r\n");
     }
     else if (cmd == "LIST")
     {
-        enqueue(client.outbuf, ":server 421 * LIST :Not implemented yet\r\n");
+		handleList(params, client);
+        // enqueue(client.outbuf, ":server 421 * LIST :Not implemented yet\r\n");
     }
     else if (cmd == "INVITE")
     {
-        enqueue(client.outbuf, ":server 421 * INVITE :Not implemented yet\r\n");
+		handleInvite(params, client);
+        // enqueue(client.outbuf, ":server 421 * INVITE :Not implemented yet\r\n");
     }
     else if (cmd == "KICK")
     {
-        enqueue(client.outbuf, ":server 421 * KICK :Not implemented yet\r\n");
+		handleKick(params, client);
+        // enqueue(client.outbuf, ":server 421 * KICK :Not implemented yet\r\n");
     }
     else if (cmd == "WHO")
     {
-        enqueue(client.outbuf, ":server 421 * WHO :Not implemented yet\r\n");
+		handleWho(params, client);
+        // enqueue(client.outbuf, ":server 421 * WHO :Not implemented yet\r\n");
     }
     else if (cmd == "WHOIS")
     {
-        enqueue(client.outbuf, ":server 421 * WHOIS :Not implemented yet\r\n");
+		handleWhois(params, client);
+        // enqueue(client.outbuf, ":server 421 * WHOIS :Not implemented yet\r\n");
     }
     else if (cmd == "PING")
     {

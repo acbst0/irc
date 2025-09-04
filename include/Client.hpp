@@ -4,7 +4,8 @@
 # include <string>
 # include <netinet/in.h>
 
-class Client {
+class Client
+{
 	private:
 	    int fd;
 	    std::string nick;
