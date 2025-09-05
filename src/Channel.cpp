@@ -18,8 +18,8 @@ bool Channel::addClient(Client* client, const std::string& providedKey)
     if (hasKey() && !checkKey(providedKey))
         return false;
     
-    if (invite_only)
-        return false; // TODO: invite list eklenecek
+    if (invite_only && !isInvited(client->getNick()))
+        return false;
     
     // user limit
     if (user_limit > 0 && (int)members.size() >= user_limit)
@@ -160,4 +160,15 @@ int Channel::getUserLimit() const
 void Channel::setUserLimit(int limit)
 {
     user_limit = limit;
+}
+
+void Channel::inviteUser(const std::string& nick)
+{
+    if (std::find(invitedNicks.begin(), invitedNicks.end(), nick) == invitedNicks.end())
+        invitedNicks.push_back(nick);
+}
+
+bool Channel::isInvited(const std::string& nick) const
+{
+    return std::find(invitedNicks.begin(), invitedNicks.end(), nick) != invitedNicks.end();
 }

@@ -14,6 +14,7 @@ class Channel
 	    std::string pin;  
 	    std::vector<Client*> members;
 	    std::vector<Client*> operators;
+	    std::vector<std::string> invitedNicks;
 	    bool invite_only;
 	    bool topic_restricted;
 	    int user_limit;
@@ -42,6 +43,8 @@ class Channel
 	
 	    bool isInviteOnly() const;
 	    void setInviteOnly(bool value);
+	    void inviteUser(const std::string& nick);
+	    bool isInvited(const std::string& nick) const;
 	    bool isTopicRestricted() const;
 	    void setTopicRestricted(bool value);
 	    int getUserLimit() const;

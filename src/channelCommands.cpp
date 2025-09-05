@@ -312,6 +312,8 @@ void Server::handleInvite(const std::vector<std::string>& params, Client &client
 	
 	enqueue(targetClient->outbuf, inviteMsg);
 	enqueue(client.outbuf, ":server 341 " + client.getNick() + " " + targetNick + " " + channelName + "\r\n");
+	
+	targetChannel->inviteUser(targetNick);
 }
 
 void Server::handleKick(const std::vector<std::string>& params, Client &client)
