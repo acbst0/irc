@@ -4,13 +4,30 @@ Server::Server()
 {
 	this->serverFd = 0;
 	this->num_of_pfd = 0;
+	this->running = true;
 }
-
-
 
 Server::~Server()
 {
+    // Tüm kanalları temizle
+    for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
+    {
+        delete it->second;
+    }
+    channels.clear();
     
+    // Tüm clientları temizle
+    for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+    {
+        if ((*it)->getFd() > 0)
+            close((*it)->getFd());
+        delete *it;
+    }
+    clients.clear();
+    
+    // Server socket'ını kapat
+    if (serverFd > 0)
+        close(serverFd);
 }
 
 void setNonBlocking(int fd)
@@ -20,6 +37,12 @@ void setNonBlocking(int fd)
 
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) 
 		throw(std::runtime_error("Failed while setting socket non-blocking."));
+}
+
+void Server::stop()
+{
+    std::cout << "Stopping server gracefully..." << std::endl;
+    this->running = false;
 }
 
 
@@ -201,10 +224,14 @@ void Server::start(int port, const char *pass)
 	struct sockaddr_in hints;
 	initServer(hints, port);
 
-	while (true)
+	while (this->running)
 	{
 		if (poll(this->pfds, this->num_of_pfd, -1) < 0)
+		{
+			if (!this->running) // Eğer server durduruluyorsa, poll hatasını görmezden gel
+				break;
 			throw std::exception();
+		}
 
 		// yeni connection olup olmadigini kontrol et.
 		if (this->pfds[0].revents & POLLIN)

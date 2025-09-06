@@ -4,6 +4,19 @@
 //#include "../include/Channel.hpp"
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
+
+// Global server pointer for signal handler
+Server* g_server = NULL;
+
+void signalHandler(int signal)
+{
+    std::cout << "\nSignal " << signal << " received. Shutting down server..." << std::endl;
+    if (g_server)
+    {
+        g_server->stop();
+    }
+}
 
 bool validate(const std::string &portS)
 {
@@ -46,15 +59,23 @@ int main(int argc, char* argv[])
         return 1;
     }
    
+    // Register signal handlers
+    signal(SIGINT, signalHandler);  // Ctrl+C
+    signal(SIGTERM, signalHandler); // Termination signal
+    signal(SIGQUIT, signalHandler); // Quit signal
     
     try {
         Server server;
+        g_server = &server;  // Set global pointer for signal handler
 
         server.start(std::atoi(argv[1]), argv[2]);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
+        g_server = NULL;
         return 1;
     }
     
+    // Clean up if we exit normally
+    g_server = NULL;
     return 0;
 }

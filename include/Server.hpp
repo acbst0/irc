@@ -41,6 +41,7 @@ class Server
 		struct pollfd pfds[BACKLOG + 1];//pollfd sayısı artırılabilir
 		int num_of_pfd;
 	    std::vector<Client *> clients;
+	    bool running; // Server çalışma durumu için flag
 	
 	public:
 	    Server();
@@ -51,6 +52,7 @@ class Server
 		bool handleClientPollout(int index);
 		void initServer(struct sockaddr_in &hints, int port);
 	    void start(int port, const char *pass);
+	    void stop(); // Server'ı güvenli şekilde durdurmak için
 	    void removeClient(int index);
 		void commandHandler(std::string cmd, std::vector<std::string> params, Client &client);
 		void checkRegistration(Client &client);
