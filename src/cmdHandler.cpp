@@ -3,18 +3,20 @@
 
 void Server::checkRegistration(Client &client)
 {
-	if (!client.getNick().empty() && !client.getUname().empty() && !client.getRegis())
-	{
-		client.setRegis(true);
-		
-		std::string fullmask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
-		
-
-		enqueue(client.outbuf, ":server 001 " + client.getNick() + " :Welcome to the Internet Relay Network " + fullmask + "\r\n");
-		enqueue(client.outbuf, ":server 002 " + client.getNick() + " :Your host is server, running version 1.0\r\n");
-		enqueue(client.outbuf, ":server 003 " + client.getNick() + " :This server was created\r\n");//tarih eklemeyi unutma
-		enqueue(client.outbuf, ":server 004 " + client.getNick() + " server 1.0 o o\r\n");
-	}
+    // PASS doğrulanmadan kayıt tamamlanmasın
+    if (!client.getNick().empty() && !client.getUname().empty() && client.getAuth() && !client.getRegis())
+    {
+        client.setRegis(true);
+        
+        std::string fullmask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
+        
+        enqueue(client.outbuf, ":server 001 " + client.getNick() + " :Welcome to the Internet Relay Network " + fullmask + "\r\n");
+        enqueue(client.outbuf, ":server 002 " + client.getNick() + " :Your host is server, running version 1.0\r\n");
+        enqueue(client.outbuf, ":server 003 " + client.getNick() + " :This server was created\r\n");//tarih eklemeyi unutma
+        enqueue(client.outbuf, ":server 004 " + client.getNick() + " server 1.0 o o\r\n");
+        // MOTD yoksa bunu gönder (HexChat bekleyebilir)
+        enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
+    }
 }
 
 
@@ -30,10 +32,43 @@ bool Server::nicknameCheck(std::string nickname)
     return true;
 }
 
-
-
 void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
-{
+{//cap bak
+    // IRCv3 CAP (HexChat bağlantı başında gönderir)
+    if (cmd == "CAP")
+    {
+        std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
+        if (params.empty())
+        {
+            enqueue(client.outbuf, ":server 461 " + nickOrStar + " CAP :Not enough parameters\r\n");
+            return;
+        }
+        std::string sub = params[0];
+        if (sub == "LS")
+        {
+            // Desteklenen capability yok: boş liste
+            enqueue(client.outbuf, ":server CAP " + nickOrStar + " LS :\r\n");
+        }
+        else if (sub == "LIST")
+        {
+            enqueue(client.outbuf, ":server CAP " + nickOrStar + " LIST :\r\n");
+        }
+        else if (sub == "REQ")
+        {
+            std::string req = params.size() > 1 ? params[1] : "";
+            enqueue(client.outbuf, ":server CAP " + nickOrStar + " NAK :" + req + "\r\n");
+        }
+        else if (sub == "END")
+        {
+            // noop
+        }
+        else
+        {
+            enqueue(client.outbuf, ":server 421 " + nickOrStar + " CAP :Unknown command\r\n");
+        }
+        return;
+    }
+
     if(cmd == "PASS")
     {
         if (params.empty())
@@ -52,16 +87,14 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         if (!client.getAuth())
         {
             enqueue(client.outbuf, ":server 464 * :Password incorrect\r\n");
+            return;
         }
+        // PASS başarılı olduysa kayıt tamamlanabilir mi kontrol et
+        checkRegistration(client);
         return ;
     }
-    
-    if(!client.getAuth())
-    {
-        enqueue(client.outbuf, ":server 464 * :Password incorrect\r\n");
-        return ;
-    }
-    
+
+    // NICK (kayıt öncesinde kabul et)
     if (cmd == "NICK")
     {
         if (params.empty())
@@ -79,14 +112,14 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         
         if (nickname != client.getNick() && !nicknameCheck(nickname))
         {
-			std::string target = client.getNick().empty() ? "*" : client.getNick();
-			enqueue(client.outbuf, ":server 433 " + target + " " + nickname + " :Nickname is already in use\r\n");
+            std::string target = client.getNick().empty() ? "*" : client.getNick();
+            enqueue(client.outbuf, ":server 433 " + target + " " + nickname + " :Nickname is already in use\r\n");
             return;
         }
         
         client.setNick(nickname);
-        
         checkRegistration(client);
+        return;
     }
     else if (cmd == "USER")
     {
@@ -115,74 +148,14 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         
         client.setUname(username);
         client.setRname(realname);
-		client.setHname(hostname); 
+        client.setHname(hostname); 
         
         checkRegistration(client);
+        return;
     }
 
-
-    else if (!client.getRegis())
-    {
-        enqueue(client.outbuf, ":server 451 * :You have not registered\r\n");
-        return ;
-    }
-
-
-    else if (cmd == "JOIN")
-    {
-        handleJoin(params, client);
-    }
-
-    else if (cmd == "PRIVMSG")
-    {
-        enqueue(client.outbuf, ":server 421 * PRIVMSG :Not implemented yet\r\n");
-    }
-
-    else if (cmd == "PART")
-    {
-        enqueue(client.outbuf, ":server 421 * PART :Not implemented yet\r\n");
-    }
-    else if (cmd == "NOTICE")
-    {
-        enqueue(client.outbuf, ":server 421 * NOTICE :Not implemented yet\r\n");
-    }
-    else if (cmd == "QUIT")
-    {
-        enqueue(client.outbuf, ":server 421 * QUIT :Not implemented yet\r\n");
-    }
-    else if (cmd == "MODE")
-    {
-        enqueue(client.outbuf, ":server 421 * MODE :Not implemented yet\r\n");
-    }
-    else if (cmd == "TOPIC")
-    {
-        enqueue(client.outbuf, ":server 421 * TOPIC :Not implemented yet\r\n");
-    }
-    else if (cmd == "NAMES")
-    {
-        enqueue(client.outbuf, ":server 421 * NAMES :Not implemented yet\r\n");
-    }
-    else if (cmd == "LIST")
-    {
-        enqueue(client.outbuf, ":server 421 * LIST :Not implemented yet\r\n");
-    }
-    else if (cmd == "INVITE")
-    {
-        enqueue(client.outbuf, ":server 421 * INVITE :Not implemented yet\r\n");
-    }
-    else if (cmd == "KICK")
-    {
-        enqueue(client.outbuf, ":server 421 * KICK :Not implemented yet\r\n");
-    }
-    else if (cmd == "WHO")
-    {
-        enqueue(client.outbuf, ":server 421 * WHO :Not implemented yet\r\n");
-    }
-    else if (cmd == "WHOIS")
-    {
-        enqueue(client.outbuf, ":server 421 * WHOIS :Not implemented yet\r\n");
-    }
-    else if (cmd == "PING")
+    // Kayıt öncesi PING/PONG/QUIT'e izin ver
+    if (cmd == "PING")
     {
         if (params.empty())
         {
@@ -190,10 +163,79 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
             return;
         }
         enqueue(client.outbuf, ":server PONG server :" + params[0] + "\r\n");
+        return;
     }
     else if (cmd == "PONG")
     {
-        // PONG komutunu sessizce kabul et (keepalive için)
+        return;
+    }
+    else if (cmd == "QUIT")
+    {
+        handleQuit(params, client);
+        return;
+    }
+
+    // Kayıt tamamlanmadan diğer komutlara izin verme
+    if (!client.getRegis())
+    {
+        enqueue(client.outbuf, ":server 451 * :You have not registered\r\n");
+        return ;
+    }
+
+    // MOTD isteğini karşıla (MOTD yoksa 422)
+    if (cmd == "MOTD")
+    {
+        enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
+        return;
+    }
+
+    if (cmd == "JOIN")
+    {
+        handleJoin(params, client);
+    }
+    else if (cmd == "PRIVMSG")
+    {
+        handlePrivMsg(params, client);
+    }
+    else if (cmd == "PART")
+    {
+        handlePart(params, client);
+    }
+    else if (cmd == "NOTICE")
+    {
+        handleNotice(params, client);
+    }
+    else if (cmd == "MODE")
+    {
+        handleMode(params, client);
+    }
+    else if (cmd == "TOPIC")
+    {
+        handleTopic(params, client);
+    }
+    else if (cmd == "NAMES")
+    {
+        handleName(params, client);
+    }
+    else if (cmd == "LIST")
+    {
+        handleList(params, client);
+    }
+    else if (cmd == "INVITE")
+    {
+        handleInvite(params, client);
+    }
+    else if (cmd == "KICK")
+    {
+        handleKick(params, client);
+    }
+    else if (cmd == "WHO")
+    {
+        handleWho(params, client);
+    }
+    else if (cmd == "WHOIS")
+    {
+        handleWhois(params, client);
     }
     else 
     {

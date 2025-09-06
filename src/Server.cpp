@@ -13,8 +13,6 @@ Server::~Server()
     
 }
 
-
-
 void setNonBlocking(int fd)
 {
     int flags = fcntl(fd, F_GETFL, 0);
@@ -82,20 +80,49 @@ void Server::removeClient(int index)
 
 
 
-void Server::commandParser(Client &client, std::string &message)
+void Server::commandParser(Client &client, std::string &message)//command parser satırlara bölecek şekilde değiştirdim
 {
 	std::cout << "Processing command from client " << client.getFd() << ": " << message << std::endl;
 	
-	std::string cmd, trailing;
-	std::vector<std::string> params;
-	parseIrc(message, cmd, params, trailing);
+	// Mesajı satırlara böl
+	std::string remaining = message;
+	size_t pos = 0;
 	
-	// Trailing parametresi varsa params'a ekle
-	if (!trailing.empty()) {
-		params.push_back(trailing);
+	while ((pos = remaining.find("\r\n")) != std::string::npos || 
+	       (pos = remaining.find("\n")) != std::string::npos)
+	{
+		std::string line = remaining.substr(0, pos);
+		remaining = remaining.substr(pos + ((remaining[pos] == '\r') ? 2 : 1));
+		
+		if (!line.empty())
+		{
+			std::string cmd, trailing;
+			std::vector<std::string> params;
+			parseIrc(line, cmd, params, trailing);
+			
+			// Trailing parametresi varsa params'a ekle
+			if (!trailing.empty()) {
+				params.push_back(trailing);
+			}
+			
+			commandHandler(cmd, params, client);
+		}
 	}
 	
-	commandHandler(cmd, params, client);
+	// Kalan veri varsa ve boş değilse işle
+	if (!remaining.empty())
+	{
+		std::string cmd, trailing;
+		std::vector<std::string> params;
+		parseIrc(remaining, cmd, params, trailing);
+		
+		// Trailing parametresi varsa params'a ekle
+		if (!trailing.empty()) {
+			params.push_back(trailing);
+		}
+		
+		commandHandler(cmd, params, client);
+	}
 }
 
 void Server::handleClient(int i)

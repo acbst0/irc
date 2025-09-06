@@ -14,8 +14,8 @@ void parseIrc(const std::string& line, std::string& cmd, std::vector<std::string
 {
     std::string s = line;
     
-    // bu kısım olmadan if içerisine girmiyor komut. düzeltildi
     size_t end = s.find_last_not_of(" \t\r\n");
+
     if (end != std::string::npos) {
         s = s.substr(0, end + 1);
     } else {
@@ -40,4 +40,12 @@ void enqueue(std::string &outbuf, const std::string& line)
 {
     outbuf += line;
     if (outbuf.size() > 1<<20) outbuf.erase(0, outbuf.size() - (1<<20));
+}
+
+// To_string fonksiyonu C++11 ile geldiği için kendi fonksiyonumuzu yazdım
+std::string to_string(int number)
+{
+	std::ostringstream oss;
+	oss << number;
+	return oss.str();
 }

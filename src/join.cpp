@@ -1,6 +1,75 @@
 #include "../include/Server.hpp"
 
 
+void Server::handlePart(const std::vector<std::string>& params, Client &client)
+{
+    if (params.empty())
+    {
+        enqueue(client.outbuf, ":server 461 " + client.getNick() + " PART :Not enough parameters\r\n");
+        return;
+    }
+    
+    std::string channels = params[0];
+    std::string partMessage = (params.size() > 1) ? params[1] : "";
+    
+    std::vector<std::string> channelList;
+    
+    // Kanal listesini parse et
+    std::stringstream channelStream(channels);
+    std::string channel;
+    while (std::getline(channelStream, channel, ','))
+    {
+        if (!channel.empty())
+            channelList.push_back(channel);
+    }
+    
+    // Her kanal için part komutunu çalıştır
+    for (size_t i = 0; i < channelList.size(); ++i)
+    {
+        std::string channelName = channelList[i];
+        
+        // Kanal var mı kontrol et
+        std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
+        
+        if (channelIt == this->channels.end())
+        {
+            enqueue(client.outbuf, ":server 403 " + client.getNick() + " " + channelName + " :No such channel\r\n");
+            continue;
+        }
+        
+        Channel* targetChannel = channelIt->second;
+        
+        // Client kanalda mı kontrol et
+        if (!targetChannel->hasClient(&client))
+        {
+            enqueue(client.outbuf, ":server 442 " + client.getNick() + " " + channelName + " :You're not on that channel\r\n");
+            continue;
+        }
+        
+        // PART mesajını hazırla
+        std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
+        std::string partMsg = ":" + userMask + " PART " + channelName;
+        if (!partMessage.empty())
+        {
+            partMsg += " :" + partMessage;
+        }
+        partMsg += "\r\n";
+        
+        // Kanaldaki herkese PART mesajı gönder (kendini de dahil et)
+        targetChannel->sendMsg(partMsg, NULL);
+        
+        // Client'ı kanaldan çıkar
+        targetChannel->removeClient(&client);
+        
+        // Eğer kanal boş kaldıysa, kanalı sil
+        if (targetChannel->getMemberCount() == 0)
+        {
+            delete targetChannel;
+            this->channels.erase(channelName);
+        }
+    }
+}
+
 void Server::handleJoin(const std::vector<std::string>& params, Client &client)
 {
     if (params.empty())
@@ -70,7 +139,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         }
         
         // kanal yoksa oluştur
-        Channel* targetChannel = nullptr;
+        Channel* targetChannel = NULL;
         std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
         
         if (channelIt == this->channels.end())
@@ -101,12 +170,11 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             continue;
         }
         
-        // JOIN başarılı - mesajları gönder
         std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
         std::string joinMsg = ":" + userMask + " JOIN " + channelName + "\r\n";
         
         // Kanaldaki herkese JOIN mesajı gönder
-        targetChannel->sendMsg(joinMsg, nullptr);
+        targetChannel->sendMsg(joinMsg, NULL);
         enqueue(client.outbuf, joinMsg);
         
         if (!targetChannel->getTopic().empty())
@@ -118,7 +186,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             enqueue(client.outbuf, ":server 331 " + client.getNick() + " " + channelName + " :No topic is set\r\n");
         }
         
-        // kanal kullanıcı listesini göster
         std::string namesList = "";
         std::vector<Client*> members = targetChannel->getMembers();
         for (std::vector<Client*>::iterator memberIt = members.begin(); memberIt != members.end(); ++memberIt)
@@ -126,7 +193,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             if (!namesList.empty())
                 namesList += " ";
             
-            // operatörğn başına @ ekle
+            // operatörün başına @ ekle
             if (targetChannel->isOperator(*memberIt))
                 namesList += "@";
             

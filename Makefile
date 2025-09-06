@@ -5,13 +5,17 @@ SRCS = src/main.cpp \
 		src/cmdHandler.cpp \
 		src/join.cpp \
 		src/Channel.cpp \
+		src/privMsg.cpp \
+		src/notice.cpp \
+		src/quit.cpp \
+		src/channelCommands.cpp
 
 
-CXX = c++
+CXX = c++ 
 
 RM = rm -rf
 
-#FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -std=c++98
 
 NAME = irc
 

@@ -50,5 +50,6 @@
 #include <cerrno>
 #include <cstring>
 #include <cctype>
+#include <algorithm>
 
 #endif
