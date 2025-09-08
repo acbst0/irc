@@ -17,7 +17,7 @@ RM = rm -rf
 
 FLAGS = -Wall -Wextra -Werror -std=c++98
 
-NAME = irc
+NAME = ircserv
 
 O_FILES := $(SRCS:.cpp=.o)
 
