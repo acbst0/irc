@@ -33,9 +33,8 @@ bool Server::nicknameCheck(std::string nickname)
 }
 
 void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
-{//cap bak
-    // IRCv3 CAP (HexChat bağlantı başında gönderir)
-    if (cmd == "CAP")
+{
+    if (cmd == "CAP")//cap bak
     {
         std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
         if (params.empty())
@@ -89,12 +88,10 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
             enqueue(client.outbuf, ":server 464 * :Password incorrect\r\n");
             return;
         }
-        // PASS başarılı olduysa kayıt tamamlanabilir mi kontrol et
         checkRegistration(client);
         return ;
     }
 
-    // NICK (kayıt öncesinde kabul et)
     if (cmd == "NICK")
     {
         if (params.empty())
@@ -154,7 +151,7 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         return;
     }
 
-    // Kayıt öncesi PING/PONG/QUIT'e izin ver
+    // hechat için kayıt öncesi ping, pong, quite izin verilmeli
     if (cmd == "PING")
     {
         if (params.empty())
@@ -195,8 +192,7 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         return;
     }
 
-    // MOTD isteğini karşıla (MOTD yoksa 422)
-    if (cmd == "MOTD")
+    if (cmd == "MOTD")//motd dosyamız yok, gerek de yok
     {
         enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
         return;

@@ -81,7 +81,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
     std::string channels = params[0];
     std::string keys = (params.size() > 1) ? params[1] : "";
     
-    //0 özel durum, bütün kanallardan ayrıl
+    // /join 0 bütün kanallardan ayrılmanı sağlar hexchatte
     if (channels == "0")
     {
         return;
@@ -89,8 +89,8 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
     
     std::vector<std::string> channelList;
     std::vector<std::string> keyList;
-    
-    // Kanal listesini parse et
+
+    //kanal listesini parçala
     std::stringstream channelStream(channels);
     std::string channel;
     while (std::getline(channelStream, channel, ','))
@@ -98,8 +98,8 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         if (!channel.empty())
             channelList.push_back(channel);
     }
-    
-    // Key listesini parse et
+
+    //keyleri parçala(bunlar hep join için)
     if (!keys.empty())
     {
         std::stringstream keyStream(keys);
@@ -143,7 +143,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         
         if (channelIt == this->channels.end())
         {
-            targetChannel = new Channel(channelName); // new kullandım destructorda delete edilmeli
+            targetChannel = new Channel(channelName);
             this->channels[channelName] = targetChannel;
         }
         else
@@ -192,7 +192,7 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             if (!namesList.empty())
                 namesList += " ";
             
-            // operatörün başına @ ekle
+            // operatörün başına @ eklenmeli
             if (targetChannel->isOperator(*memberIt))
                 namesList += "@";
             
