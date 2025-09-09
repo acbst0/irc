@@ -10,24 +10,31 @@ SRCS = src/main.cpp \
 		src/quit.cpp \
 		src/channelCommands.cpp
 
-
 CXX = c++ 
-
 RM = rm -rf
-
 FLAGS = -Wall -Wextra -Werror -std=c++98
-
 NAME = ircserv
+OBJS_DIR = objs
 
-O_FILES := $(SRCS:.cpp=.o)
+O_FILES = $(SRCS:src/%.cpp=$(OBJS_DIR)/%.o)
 
-all: $(O_FILES)
-	$(CXX) $(SRCS) -o $(NAME)
+all: $(NAME)
+
+$(NAME): $(O_FILES)
+	$(CXX) $(FLAGS) $(O_FILES) -o $(NAME)
+
+$(OBJS_DIR):
+	mkdir -p $(OBJS_DIR)
+
+$(O_FILES): $(OBJS_DIR)/%.o: src/%.cpp | $(OBJS_DIR)
+	$(CXX) $(FLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(O_FILES)
+	$(RM) $(OBJS_DIR)
 
-fclean : clean
+fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+.PHONY: all clean fclean re

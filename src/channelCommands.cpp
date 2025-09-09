@@ -157,7 +157,7 @@ void Server::handleTopic(const std::vector<std::string>& params, Client &client)
 		std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
 		std::string topicMsg = ":" + userMask + " TOPIC " + channelName + " :" + newTopic + "\r\n";
 		
-		targetChannel->sendMsg(topicMsg, &client);
+		targetChannel->sendMsg(topicMsg, NULL); // Kendine de gönder
 	}
 }
 

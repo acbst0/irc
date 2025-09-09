@@ -5,6 +5,9 @@ Server::Server()
 	this->serverFd = 0;
 	this->num_of_pfd = 0;
 	this->running = true;
+	
+	// pfds array'ini initialize et
+	std::memset(this->pfds, 0, sizeof(this->pfds));
 }
 
 Server::~Server()
@@ -222,6 +225,7 @@ void Server::start(int port, const char *pass)
 	this->password = pass;
 
 	struct sockaddr_in hints;
+	std::memset(&hints, 0, sizeof(hints)); // Initialize hints to zero
 	initServer(hints, port);
 
 	while (this->running)

@@ -99,17 +99,16 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             channelList.push_back(channel);
     }
     
-    // key daha implemente edilmedi
-
-    // if (!keys.empty())
-    // {
-    //     std::stringstream keyStream(keys);
-    //     std::string key;
-    //     while (std::getline(keyStream, key, ','))
-    //     {
-    //         keyList.push_back(key);
-    //     }
-    // }
+    // Key listesini parse et
+    if (!keys.empty())
+    {
+        std::stringstream keyStream(keys);
+        std::string key;
+        while (std::getline(keyStream, key, ','))
+        {
+            keyList.push_back(key);
+        }
+    }
     
     // her parametre için join komutunu çalıştır
     for (size_t i = 0; i < channelList.size(); ++i)
@@ -159,13 +158,13 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             {
                 enqueue(client.outbuf, ":server 475 " + client.getNick() + " " + channelName + " :Cannot join channel (+k)\r\n");
             }
-            else if (targetChannel->isInviteOnly())
-            {
-                enqueue(client.outbuf, ":server 473 " + client.getNick() + " " + channelName + " :Cannot join channel (+i)\r\n");
-            }
             else if (targetChannel->getUserLimit() > 0 && (int)targetChannel->getMemberCount() >= targetChannel->getUserLimit())
             {
                 enqueue(client.outbuf, ":server 471 " + client.getNick() + " " + channelName + " :Cannot join channel (+l)\r\n");
+            }
+            else if (targetChannel->isInviteOnly())
+            {
+                enqueue(client.outbuf, ":server 473 " + client.getNick() + " " + channelName + " :Cannot join channel (+i)\r\n");
             }
             continue;
         }

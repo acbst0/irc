@@ -9,6 +9,9 @@ void Server::handleQuit(const std::vector<std::string>& params, Client &client)
     std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
     std::string quitMsg = ":" + userMask + " QUIT :" + quitMessage + "\r\n";
     
+    // Silinecek kanalları topla
+    std::vector<std::string> channelsToDelete;
+    
     for (std::map<std::string, Channel*>::iterator channelIt = this->channels.begin(); channelIt != this->channels.end(); ++channelIt)
     {
         Channel* channel = channelIt->second;
@@ -20,9 +23,14 @@ void Server::handleQuit(const std::vector<std::string>& params, Client &client)
             if (channel->getMemberCount() == 0)
             {
                 delete channel;
-                this->channels.erase(channelIt->first);
+                channelsToDelete.push_back(channelIt->first);
             }
         }
     }
+    for (std::vector<std::string>::iterator it = channelsToDelete.begin(); it != channelsToDelete.end(); ++it)
+    {
+        this->channels.erase(*it);
+    }
+    
     enqueue(client.outbuf, "ERROR :Closing Link: " + client.getHname() + " (" + quitMessage + ")\r\n");
 }
