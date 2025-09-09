@@ -250,9 +250,6 @@ void Server::handleName(const std::vector<std::string>& params, Client &client)
 
 void Server::handleList(const std::vector<std::string>& params, Client &client)
 {
-	// LIST başlangıç mesajı gönder (HexChat için gerekli)
-	enqueue(client.outbuf, ":server 321 " + client.getNick() + " Channel :Users  Name\r\n");
-	
 	std::string channelList = (params.empty()) ? "" : params[0];
 	std::vector<std::string> channelsToList;
 	
