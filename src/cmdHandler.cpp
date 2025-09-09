@@ -175,11 +175,24 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         return;
     }
 
-    // Kayıt tamamlanmadan diğer komutlara izin verme
-    if (!client.getRegis())
+    // Bilinen komutları kontrol et
+    if (cmd == "JOIN" || cmd == "PRIVMSG" || cmd == "PART" || cmd == "NOTICE" || 
+        cmd == "MODE" || cmd == "TOPIC" || cmd == "NAMES" || cmd == "LIST" || 
+        cmd == "INVITE" || cmd == "KICK" || cmd == "WHO" || cmd == "WHOIS" || cmd == "MOTD")
     {
-        enqueue(client.outbuf, ":server 451 * :You have not registered\r\n");
-        return ;
+        // Kayıt tamamlanmadan bu komutlara izin verme
+        if (!client.getRegis())
+        {
+            enqueue(client.outbuf, ":server 451 * :You have not registered\r\n");
+            return ;
+        }
+    }
+    else
+    {
+        // Bilinmeyen komut
+        std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
+        enqueue(client.outbuf, ":server 421 " + nickOrStar + " " + cmd + " :Unknown command\r\n");
+        return;
     }
 
     // MOTD isteğini karşıla (MOTD yoksa 422)
@@ -236,9 +249,5 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
     else if (cmd == "WHOIS")
     {
         handleWhois(params, client);
-    }
-    else 
-    {
-        enqueue(client.outbuf, ":server 421 * " + cmd + " :Unknown command\r\n");
     }
 }

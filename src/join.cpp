@@ -33,7 +33,7 @@ void Server::handlePart(const std::vector<std::string>& params, Client &client)
         
         if (channelIt == this->channels.end())
         {
-            enqueue(client.outbuf, ":server 403 " + client.getNick() + " " + channelName + " :No such channel\r\n");
+            enqueue(client.outbuf, ":server 442 " + client.getNick() + " " + channelName + " :You're not on that channel\r\n");
             continue;
         }
         
@@ -154,17 +154,17 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         //userı kanala eklemek
         if (!targetChannel->addClient(&client, channelKey))
         {
-            if (targetChannel->hasKey() && !targetChannel->checkKey(channelKey))
+            if (targetChannel->isInviteOnly() && !targetChannel->isInvited(client.getNick()))
+            {
+                enqueue(client.outbuf, ":server 473 " + client.getNick() + " " + channelName + " :Cannot join channel (+i)\r\n");
+            }
+            else if (targetChannel->hasKey() && !targetChannel->checkKey(channelKey))
             {
                 enqueue(client.outbuf, ":server 475 " + client.getNick() + " " + channelName + " :Cannot join channel (+k)\r\n");
             }
             else if (targetChannel->getUserLimit() > 0 && (int)targetChannel->getMemberCount() >= targetChannel->getUserLimit())
             {
                 enqueue(client.outbuf, ":server 471 " + client.getNick() + " " + channelName + " :Cannot join channel (+l)\r\n");
-            }
-            else if (targetChannel->isInviteOnly())
-            {
-                enqueue(client.outbuf, ":server 473 " + client.getNick() + " " + channelName + " :Cannot join channel (+i)\r\n");
             }
             continue;
         }

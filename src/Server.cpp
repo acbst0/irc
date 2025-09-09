@@ -87,16 +87,54 @@ void Server::initServer(struct sockaddr_in &hints, int port)
 
 void Server::removeClient(int index)
 {
+	Client* clientToRemove = NULL;
+	
+	// Önce silinecek client'ı bul
 	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if ((*it)->getFd() == pfds[index].fd)
 		{
-			delete *it;
-			clients.erase(it);
+			clientToRemove = *it;
 			break;
 		}
 	}
 	
+	if (clientToRemove)
+	{
+		// Client'ı tüm kanallardan çıkar
+		for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); )
+		{
+			Channel* channel = it->second;
+			if (channel->hasClient(clientToRemove))
+			{
+				channel->removeClient(clientToRemove);
+				
+				// Eğer kanal boş kaldıysa sil
+				if (channel->getMemberCount() == 0)
+				{
+					delete channel;
+					std::map<std::string, Channel*>::iterator toErase = it;
+					++it;
+					channels.erase(toErase);
+					continue;
+				}
+			}
+			++it;
+		}
+		
+		// Client'ı clients vektöründen çıkar ve sil
+		for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+		{
+			if (*it == clientToRemove)
+			{
+				delete *it;
+				clients.erase(it);
+				break;
+			}
+		}
+	}
+	
+	// Poll array'ını düzenle
 	for (int i = index; i < num_of_pfd - 1; i++)
 	{
 		pfds[i] = pfds[i + 1];
@@ -106,49 +144,20 @@ void Server::removeClient(int index)
 
 
 
-void Server::commandParser(Client &client, std::string &message)//command parser satırlara bölecek şekilde değiştirdim
+void Server::commandParser(Client &client, std::string &message)//single command parser
 {
 	std::cout << "Processing command from client " << client.getFd() << ": " << message << std::endl;
 	
-	// Mesajı satırlara böl
-	std::string remaining = message;
-	size_t pos = 0;
+	std::string cmd, trailing;
+	std::vector<std::string> params;
+	parseIrc(message, cmd, params, trailing);
 	
-	while ((pos = remaining.find("\r\n")) != std::string::npos || 
-	       (pos = remaining.find("\n")) != std::string::npos)
-	{
-		std::string line = remaining.substr(0, pos);
-		remaining = remaining.substr(pos + ((remaining[pos] == '\r') ? 2 : 1));
-		
-		if (!line.empty())
-		{
-			std::string cmd, trailing;
-			std::vector<std::string> params;
-			parseIrc(line, cmd, params, trailing);
-			
-			// Trailing parametresi varsa params'a ekle
-			if (!trailing.empty()) {
-				params.push_back(trailing);
-			}
-			
-			commandHandler(cmd, params, client);
-		}
+	// Trailing parametresi varsa params'a ekle
+	if (!trailing.empty()) {
+		params.push_back(trailing);
 	}
 	
-	// Kalan veri varsa ve boş değilse işle
-	if (!remaining.empty())
-	{
-		std::string cmd, trailing;
-		std::vector<std::string> params;
-		parseIrc(remaining, cmd, params, trailing);
-		
-		// Trailing parametresi varsa params'a ekle
-		if (!trailing.empty()) {
-			params.push_back(trailing);
-		}
-		
-		commandHandler(cmd, params, client);
-	}
+	commandHandler(cmd, params, client);
 }
 
 void Server::handleClient(int i)
@@ -179,15 +188,31 @@ void Server::handleClient(int i)
 	else
 	{
 		buffer[bytes] = '\0';
-		std::string message(buffer);
-		std::cout << "Received: " << buffer << std::endl;
 		
 		// search for client and pass it to command parser
 		for (size_t j = 0; j < clients.size(); j++)
 		{
 			if (clients[j]->getFd() == pfds[i].fd)
 			{
-				commandParser(*clients[j], message);
+				// Gelen veriyi input buffer'a ekle
+				clients[j]->inbuf.append(buffer, bytes);
+				
+				// Buffer'da tam komutları ara ve işle
+				std::string& inputBuffer = clients[j]->inbuf;
+				size_t pos = 0;
+				
+				while ((pos = inputBuffer.find("\r\n")) != std::string::npos || 
+					   (pos = inputBuffer.find("\n")) != std::string::npos)
+				{
+					std::string line = inputBuffer.substr(0, pos);
+					inputBuffer.erase(0, pos + ((inputBuffer[pos] == '\r') ? 2 : 1));
+					
+					if (!line.empty())
+					{
+						std::cout << "Processing complete command from client " << clients[j]->getFd() << ": " << line << std::endl;
+						commandParser(*clients[j], line);
+					}
+				}
 				break;
 			}
 		}

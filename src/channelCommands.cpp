@@ -4,8 +4,7 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 {
 	if (params.empty())
     {
-        // TODO : Doğru error komutu bulamadım :(
-		// enqueue(client.outbuf, ":server 461 " + client.getNick() + " PART :Not enough parameters\r\n");
+        enqueue(client.outbuf, ":server 461 " + client.getNick() + " MODE :Not enough parameters\r\n");
         return ;
     }
 
@@ -20,12 +19,7 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 			return ;
 		}
 		targetChannel = channelIt->second;
-		if (!targetChannel->hasClient(&client))
-		{
-			enqueue(client.outbuf, ":server 442 " + client.getNick() + " " + target + " :You're not on that channel\r\n");
-			return ;
-		}
-		if (!targetChannel->isOperator(&client))
+		if (!targetChannel->isOperator(&client) && params.size() > 1)
 		{
 			enqueue(client.outbuf, ":server 482 " + client.getNick() + " " + target + " :You're not channel operator\r\n");
 			return ;
@@ -82,6 +76,42 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 						case 't':
 							targetChannel->setTopicRestricted(adding);
 							break;
+						case 'o':
+							// +o/-o operatör modunu client parametresiyle birlikte handle et
+							if (params.size() < 3)
+							{
+								enqueue(client.outbuf, ":server 461 " + client.getNick() + " MODE :Not enough parameters\r\n");
+								return ;
+							}
+							{
+								std::string targetNick = params[2];
+								Client* targetClient = NULL;
+								for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+								{
+									if ((*it)->getNick() == targetNick)
+									{
+										targetClient = *it;
+										break;
+									}
+								}
+								
+								if (targetClient && targetChannel->hasClient(targetClient))
+								{
+									if (adding)
+									{
+										targetChannel->addOperator(targetClient);
+									}
+									else
+									{
+										targetChannel->removeOperator(targetClient);
+									}
+									
+									std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
+									std::string modeMsg = ":" + userMask + " MODE " + target + " " + (adding ? "+o" : "-o") + " " + targetNick + "\r\n";
+									targetChannel->sendMsg(modeMsg, NULL);
+								}
+							}
+							break;
 						case 'l':
 							if (adding)
 							{
@@ -99,6 +129,14 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 									return ;
 								}
 							}
+							else
+							{
+								targetChannel->setUserLimit(0);
+							}
+							break;
+						default:
+							enqueue(client.outbuf, ":server 472 " + client.getNick() + " " + modeChar + " :is unknown mode char to me\r\n");
+							return;
 					}
 				}
 			}
@@ -373,7 +411,7 @@ void Server::handleKick(const std::vector<std::string>& params, Client &client)
 	
 	std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
 	std::string kickMsg = ":" + userMask + " KICK " + channelName + " " + targetNick + " :" + kickMessage + "\r\n";
-	targetChannel->sendMsg(kickMsg, &client);
+	targetChannel->sendMsg(kickMsg, NULL); // Herkesi dahil et
 	targetChannel->removeClient(targetClient);
 	if (targetChannel->getMemberCount() == 0)
 	{

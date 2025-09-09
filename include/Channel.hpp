@@ -37,6 +37,7 @@ class Channel
 	    std::vector<Client*> getMembers() const;
 	    bool isOperator(Client* client);
 	    void addOperator(Client* client);
+	    void removeOperator(Client* client);
 	    size_t getMemberCount() const;
 	
 	    void sendMsg(const std::string& message, Client* sender = NULL);

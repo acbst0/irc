@@ -53,7 +53,7 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
             
             if (channelIt == this->channels.end())
             {
-                enqueue(client.outbuf, ":server 403 " + client.getNick() + " " + currentTarget + " :No such channel\r\n");
+                enqueue(client.outbuf, ":server 404 " + client.getNick() + " " + currentTarget + " :Cannot send to channel\r\n");
                 continue;
             }
             

@@ -21,8 +21,8 @@ bool Channel::addClient(Client* client, const std::string& providedKey)
     if (invite_only && !isInvited(client->getNick()))
         return false;
     
-    // user limit
-    if (user_limit > 0 && (int)members.size() >= user_limit)
+    // user limit (invite edilmişse bypass et)
+    if (user_limit > 0 && (int)members.size() >= user_limit && !isInvited(client->getNick()))
         return false;
     
     // Kullanıcıyı ekle
@@ -114,6 +114,18 @@ void Channel::addOperator(Client* client)
 {
     if (!isOperator(client))
         operators.push_back(client);
+}
+
+void Channel::removeOperator(Client* client)
+{
+    for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); ++it)
+    {
+        if (*it == client)
+        {
+            operators.erase(it);
+            break;
+        }
+    }
 }
 
 size_t Channel::getMemberCount() const
