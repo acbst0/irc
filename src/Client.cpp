@@ -7,6 +7,8 @@ Client::Client()
 	this->is_registered = false;
 	this->nick = "";
 	this->username = "";
+	this->away = false;
+	this->awayMessage = "";
 }
 
 Client::Client(int _fd)
@@ -16,6 +18,8 @@ Client::Client(int _fd)
 	this->is_registered = false;
 	this->nick = "";
 	this->username = "";
+	this->away = false;
+	this->awayMessage = "";
 }
 
 Client::~Client() {}
@@ -49,6 +53,11 @@ void Client::setNick(std::string nick){this->nick = nick;}
 void Client::setUname(std::string username){this->username = username;}
 void Client::setHname(std::string hostname){this->hostname = hostname;}
 void Client::setRname(std::string realname){this->realname = realname;}
+
+bool Client::isAway() { return this->away; }
+void Client::setAway(bool status) { this->away = status; }
+std::string Client::getAwayMessage() { return this->awayMessage; }
+void Client::setAwayMessage(std::string message) { this->awayMessage = message; }
 
 
 

@@ -71,6 +71,7 @@ class Server
 		void handleKick(const std::vector<std::string>& params, Client &client);
 		void handleWho(const std::vector<std::string>& params, Client &client);
 		void handleWhois(const std::vector<std::string>& params, Client &client);
+		void handleAway(const std::vector<std::string>& params, Client &client);
 		
 	    //void acceptClient();
 	    //void handleClientMessage(int client_fd, const std::string& message);

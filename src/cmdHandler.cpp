@@ -175,7 +175,7 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
     // Bilinen komutları kontrol et
     if (cmd == "JOIN" || cmd == "PRIVMSG" || cmd == "PART" || cmd == "NOTICE" || 
         cmd == "MODE" || cmd == "TOPIC" || cmd == "NAMES" || cmd == "LIST" || 
-        cmd == "INVITE" || cmd == "KICK" || cmd == "WHO" || cmd == "WHOIS" || cmd == "MOTD")
+        cmd == "INVITE" || cmd == "KICK" || cmd == "WHO" || cmd == "WHOIS" || cmd == "MOTD" || cmd == "AWAY")
     {
         // Kayıt tamamlanmadan bu komutlara izin verme
         if (!client.getRegis())
@@ -245,5 +245,9 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
     else if (cmd == "WHOIS")
     {
         handleWhois(params, client);
+    }
+    else if (cmd == "AWAY")
+    {
+        handleAway(params, client);
     }
 }

@@ -89,9 +89,8 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
                 continue;
             }
 
-            // TODO: Away durumu kontrolü
-            // if (targetClient->isAway())
-            //     enqueue(client.outbuf, ":server 301 " + client.getNick() + " " + currentTarget + " :" + targetClient->getAwayMessage() + "\r\n");
+            if (targetClient->isAway())
+                enqueue(client.outbuf, ":server 301 " + client.getNick() + " " + currentTarget + " :" + targetClient->getAwayMessage() + "\r\n");
 
             enqueue(targetClient->outbuf, privmsgLine);
         }

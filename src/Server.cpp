@@ -303,3 +303,35 @@ void Server::start(int port, const char *pass)
 	}
 	close(this->serverFd);
 }
+
+
+//to be inspected
+void Server::handleAway(const std::vector<std::string>& params, Client &client)
+{
+    if (params.empty())
+    {
+        // AWAY komutu parametresiz: away durumunu kaldır
+        if (client.isAway())
+        {
+            client.setAway(false);
+            client.setAwayMessage("");
+            enqueue(client.outbuf, ":server 305 " + client.getNick() + " :You are no longer marked as being away\r\n");
+        }
+        else
+        {
+            enqueue(client.outbuf, ":server 306 " + client.getNick() + " :You have been marked as being away\r\n");
+        }
+    }
+    else
+    {
+        // AWAY <message>: away durumunu ayarla
+        std::string message = params[0];
+        for (size_t i = 1; i < params.size(); ++i)
+        {
+            message += " " + params[i];
+        }
+        client.setAway(true);
+        client.setAwayMessage(message);
+        enqueue(client.outbuf, ":server 306 " + client.getNick() + " :You have been marked as being away\r\n");
+    }
+}

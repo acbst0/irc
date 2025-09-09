@@ -14,6 +14,8 @@ class Client
 		std::string hostname;
 	    bool is_authenticated;
 	    bool is_registered;
+	    bool away;
+	    std::string awayMessage;
 		
 		public:
 		Client();
@@ -38,6 +40,10 @@ class Client
 		void setUname(std::string username);
 		void setRname(std::string realname);
 		void setHname(std::string hostname);
+		bool isAway();
+		void setAway(bool status);
+		std::string getAwayMessage();
+		void setAwayMessage(std::string message);
 
 };
 
