@@ -112,7 +112,6 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         return;
     }
 
-    // hechat için kayıt öncesi ping, pong, quite izin verilmeli
     if (cmd == "PING")
     {
         if (params.empty())
@@ -133,12 +132,10 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         return;
     }
 
-    // Bilinen komutları kontrol et
     if (cmd == "JOIN" || cmd == "PRIVMSG" || cmd == "PART" || cmd == "NOTICE" || 
         cmd == "MODE" || cmd == "TOPIC" || cmd == "NAMES" || cmd == "LIST" || 
         cmd == "INVITE" || cmd == "KICK" || cmd == "WHO" || cmd == "WHOIS" || cmd == "MOTD" || cmd == "AWAY" || cmd == "BACK")
     {
-        // Kayıt tamamlanmadan bu komutlara izin verme
         if (!client.getRegis())
         {
             enqueue(client.outbuf, ":server 451 * :You have not registered\r\n");
@@ -147,13 +144,12 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
     }
     else
     {
-        // Bilinmeyen komut
         std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
         enqueue(client.outbuf, ":server 421 " + nickOrStar + " " + cmd + " :Unknown command\r\n");
         return;
     }
 
-    if (cmd == "MOTD")//motd dosyamız yok, gerek de yok
+    if (cmd == "MOTD")
     {
         enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
         return;

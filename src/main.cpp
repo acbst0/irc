@@ -1,17 +1,15 @@
 #include "../include/Server.hpp"
 #include "../include/libs.hpp"
 #include "../include/Client.hpp"
-//#include "../include/Channel.hpp"
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 
-// Global server pointer for signal handler
 Server* g_server = NULL;
 
 void signalHandler(int signal)
 {
-    std::cout << "\nSignal " << signal << " received. Shutting down server..." << std::endl;
+    std::cout << "\nSignal " << signal << " received. Shutting down" << std::endl;
     if (g_server)
     {
         g_server->stop();
@@ -59,14 +57,13 @@ int main(int argc, char* argv[])
         return 1;
     }
    
-    // Register signal handlers
-    signal(SIGINT, signalHandler);  // Ctrl+C
-    signal(SIGTERM, signalHandler); // Termination signal
-    signal(SIGQUIT, signalHandler); // Quit signal
+    signal(SIGINT, signalHandler); 
+    signal(SIGTERM, signalHandler);
+    signal(SIGQUIT, signalHandler);
     
     try {
         Server server;
-        g_server = &server;  // Set global pointer for signal handler
+        g_server = &server;
 
         server.start(std::atoi(argv[1]), argv[2]);
     } catch (const std::exception& e) {
@@ -75,7 +72,6 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    // Clean up if we exit normally
     g_server = NULL;
     return 0;
 }

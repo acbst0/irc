@@ -6,20 +6,17 @@ Server::Server()
 	this->num_of_pfd = 0;
 	this->running = true;
 	
-	// pfds array'ini initialize et
 	std::memset(this->pfds, 0, sizeof(this->pfds));
 }
 
 Server::~Server()
 {
-    // Tüm kanalları temizle
     for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
     {
         delete it->second;
     }
     channels.clear();
     
-    // Tüm clientları temizle
     for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
     {
         if ((*it)->getFd() > 0)
@@ -28,23 +25,19 @@ Server::~Server()
     }
     clients.clear();
     
-    // Server socket'ını kapat
     if (serverFd > 0)
         close(serverFd);
 }
 
 void setNonBlocking(int fd)
 {
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags < 0) flags = 0;
-
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) 
 		throw(std::runtime_error("Failed while setting socket non-blocking."));
 }
 
 void Server::stop()
 {
-    std::cout << "Stopping server gracefully..." << std::endl;
+    std::cout << "Stopping..." << std::endl;
     this->running = false;
 }
 
@@ -89,7 +82,6 @@ void Server::removeClient(int index)
 {
 	Client* clientToRemove = NULL;
 	
-	// Önce silinecek client'ı bul
 	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
 	{
 		if ((*it)->getFd() == pfds[index].fd)
@@ -101,7 +93,6 @@ void Server::removeClient(int index)
 	
 	if (clientToRemove)
 	{
-		// Client'ı tüm kanallardan çıkar
 		for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); )
 		{
 			Channel* channel = it->second;
@@ -109,7 +100,6 @@ void Server::removeClient(int index)
 			{
 				channel->removeClient(clientToRemove);
 				
-				// Eğer kanal boş kaldıysa sil
 				if (channel->getMemberCount() == 0)
 				{
 					delete channel;
@@ -122,7 +112,6 @@ void Server::removeClient(int index)
 			++it;
 		}
 		
-		// Client'ı clients vektöründen çıkar ve sil
 		for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
 		{
 			if (*it == clientToRemove)
@@ -134,7 +123,6 @@ void Server::removeClient(int index)
 		}
 	}
 	
-	// Poll array'ını düzenle
 	for (int i = index; i < num_of_pfd - 1; i++)
 	{
 		pfds[i] = pfds[i + 1];
@@ -144,7 +132,7 @@ void Server::removeClient(int index)
 
 
 
-void Server::commandParser(Client &client, std::string &message)//single command parser
+void Server::commandParser(Client &client, std::string &message)
 {
 	std::cout << "Processing command from client " << client.getFd() << ": " << message << std::endl;
 	
@@ -152,7 +140,6 @@ void Server::commandParser(Client &client, std::string &message)//single command
 	std::vector<std::string> params;
 	parseIrc(message, cmd, params, trailing);
 	
-	// Trailing parametresi varsa params'a ekle
 	if (!trailing.empty()) {
 		params.push_back(trailing);
 	}
@@ -162,11 +149,11 @@ void Server::commandParser(Client &client, std::string &message)//single command
 
 void Server::handleClient(int i)
 {
-	char buffer[BUF_SIZE];//buffer yönetimine bak
+	char buffer[BUF_SIZE];
 	int bytes = recv(this->pfds[i].fd, buffer, sizeof(buffer) - 1, 0);
 	if (bytes < 0)
 	{
-		if (errno == EAGAIN || errno == EWOULDBLOCK)//bunun sayesinde halletti
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
 		{
 			return;
 		}
@@ -189,15 +176,12 @@ void Server::handleClient(int i)
 	{
 		buffer[bytes] = '\0';
 		
-		// search for client and pass it to command parser
 		for (size_t j = 0; j < clients.size(); j++)
 		{
 			if (clients[j]->getFd() == pfds[i].fd)
 			{
-				// Gelen veriyi input buffer'a ekle
 				clients[j]->inbuf.append(buffer, bytes);
 				
-				// Buffer'da tam komutları ara ve işle
 				std::string& inputBuffer = clients[j]->inbuf;
 				size_t pos = 0;
 				
@@ -236,7 +220,7 @@ bool Server::handleClientPollout(int i)
 				std::cout << "Send error: " << strerror(errno) << std::endl;
 				close(pfds[i].fd);
 				removeClient(i);
-				return true; // removed
+				return true;
 			}
 			break;
 		}
@@ -250,19 +234,18 @@ void Server::start(int port, const char *pass)
 	this->password = pass;
 
 	struct sockaddr_in hints;
-	std::memset(&hints, 0, sizeof(hints)); // Initialize hints to zero
+	std::memset(&hints, 0, sizeof(hints));
 	initServer(hints, port);
 
 	while (this->running)
 	{
 		if (poll(this->pfds, this->num_of_pfd, -1) < 0)
 		{
-			if (!this->running) // Eğer server durduruluyorsa, poll hatasını görmezden gel
+			if (!this->running)
 				break;
 			throw std::exception();
 		}
 
-		// yeni connection olup olmadigini kontrol et.
 		if (this->pfds[0].revents & POLLIN)
 		{
 			Client *cl = new Client;
@@ -275,7 +258,7 @@ void Server::start(int port, const char *pass)
 				setNonBlocking(cl->getFd());
 
 				this->pfds[this->num_of_pfd].fd = cl->getFd();
-				this->pfds[this->num_of_pfd].events = POLLIN | POLLOUT;//pollout durumuna da baktı
+				this->pfds[this->num_of_pfd].events = POLLIN | POLLOUT;
 				this->num_of_pfd++;
 				this->clients.push_back(cl);
 				
@@ -288,14 +271,12 @@ void Server::start(int port, const char *pass)
 			}
 		}
 		
-		// surekli pollfdnin icindeki clientler veri gonderiyor mu onu kontrol et
 		for (int i = 1; i < this->num_of_pfd; i++)
 		{
-			if (this->pfds[i].revents & POLLIN)// girdi durumunda clientleri ayarlıyor
+			if (this->pfds[i].revents & POLLIN)
 				handleClient(i);
-			if (this->pfds[i].revents & POLLOUT)// çıktı durumunda clientleri ayarlıyor
+			if (this->pfds[i].revents & POLLOUT)
 			{
-				// kullanıcıya not; true döndürdüğü zaman clientın kaldırıldığı anlaşılmalı, buna göre i düzenlenmeli
 				if (handleClientPollout(i))
 					i--;
 			}
@@ -305,33 +286,3 @@ void Server::start(int port, const char *pass)
 }
 
 
-//to be inspected
-void Server::handleAway(const std::vector<std::string>& params, Client &client)
-{
-    if (params.empty())
-    {
-        // AWAY komutu parametresiz: away durumunu kaldır
-        if (client.isAway())
-        {
-            client.setAway(false);
-            client.setAwayMessage("");
-            enqueue(client.outbuf, ":server 305 " + client.getNick() + " :You are no longer marked as being away\r\n");
-        }
-        else
-        {
-            enqueue(client.outbuf, ":server 306 " + client.getNick() + " :You have been marked as being away\r\n");
-        }
-    }
-    else
-    {
-        // AWAY <message>: away durumunu ayarla
-        std::string message = params[0];
-        for (size_t i = 1; i < params.size(); ++i)
-        {
-            message += " " + params[i];
-        }
-        client.setAway(true);
-        client.setAwayMessage(message);
-        enqueue(client.outbuf, ":server 306 " + client.getNick() + " :You have been marked as being away\r\n");
-    }
-}

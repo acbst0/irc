@@ -14,7 +14,6 @@ void Server::handlePart(const std::vector<std::string>& params, Client &client)
     
     std::vector<std::string> channelList;
     
-    // Kanal listesini parse et
     std::stringstream channelStream(channels);
     std::string channel;
     while (std::getline(channelStream, channel, ','))
@@ -23,12 +22,10 @@ void Server::handlePart(const std::vector<std::string>& params, Client &client)
             channelList.push_back(channel);
     }
     
-    // Her kanal için part komutunu çalıştır
     for (size_t i = 0; i < channelList.size(); ++i)
     {
         std::string channelName = channelList[i];
         
-        // Kanal var mı kontrol et
         std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
         
         if (channelIt == this->channels.end())
@@ -39,14 +36,12 @@ void Server::handlePart(const std::vector<std::string>& params, Client &client)
         
         Channel* targetChannel = channelIt->second;
         
-        // Client kanalda mı kontrol et
         if (!targetChannel->hasClient(&client))
         {
             enqueue(client.outbuf, ":server 442 " + client.getNick() + " " + channelName + " :You're not on that channel\r\n");
             continue;
         }
         
-        // PART mesajını hazırla
         std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
         std::string partMsg = ":" + userMask + " PART " + channelName;
         if (!partMessage.empty())
@@ -55,13 +50,10 @@ void Server::handlePart(const std::vector<std::string>& params, Client &client)
         }
         partMsg += "\r\n";
         
-        // Kanaldaki herkese PART mesajı gönder (kendini de dahil et)
         targetChannel->sendMsg(partMsg, NULL);
         
-        // Client'ı kanaldan çıkar
         targetChannel->removeClient(&client);
         
-        // Eğer kanal boş kaldıysa, kanalı sil
         if (targetChannel->getMemberCount() == 0)
         {
             delete targetChannel;
@@ -81,7 +73,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
     std::string channels = params[0];
     std::string keys = (params.size() > 1) ? params[1] : "";
     
-    // /join 0 bütün kanallardan ayrılmanı sağlar hexchatte
     if (channels == "0")
     {
         return;
@@ -90,7 +81,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
     std::vector<std::string> channelList;
     std::vector<std::string> keyList;
 
-    //kanal listesini parçala
     std::stringstream channelStream(channels);
     std::string channel;
     while (std::getline(channelStream, channel, ','))
@@ -99,7 +89,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             channelList.push_back(channel);
     }
 
-    //keyleri parçala(bunlar hep join için)
     if (!keys.empty())
     {
         std::stringstream keyStream(keys);
@@ -110,7 +99,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         }
     }
     
-    // her parametre için join komutunu çalıştır
     for (size_t i = 0; i < channelList.size(); ++i)
     {
         std::string channelName = channelList[i];
@@ -122,7 +110,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             continue;
         }
         
-        // rfc 2812 kanal ismi maksimum 50 karakterden oluşabilir.
         if (channelName.length() > 50)
         {
             enqueue(client.outbuf, ":server 403 " + client.getNick() + " " + channelName + " :No such channel\r\n");
@@ -137,7 +124,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             continue;
         }
         
-        // kanal yoksa oluştur
         Channel* targetChannel = NULL;
         std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
         
@@ -151,7 +137,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             targetChannel = channelIt->second;
         }
         
-        //userı kanala eklemek
         if (!targetChannel->addClient(&client, channelKey))
         {
             if (targetChannel->isInviteOnly() && !targetChannel->isInvited(client.getNick()))
@@ -172,7 +157,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
         std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
         std::string joinMsg = ":" + userMask + " JOIN " + channelName + "\r\n";
         
-        // Kanaldaki herkese JOIN mesajı gönder
         targetChannel->sendMsg(joinMsg, NULL);
         enqueue(client.outbuf, joinMsg);
         
@@ -192,7 +176,6 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
             if (!namesList.empty())
                 namesList += " ";
             
-            // operatörün başına @ eklenmeli
             if (targetChannel->isOperator(*memberIt))
                 namesList += "@";
             

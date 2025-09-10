@@ -26,22 +26,21 @@
 # include "Client.hpp"
 # include "Channel.hpp"
 
-# define BACKLOG 10
+# define BACKLOG 128
 # define BUF_SIZE 1024
 
-//class Channel;
 
 class Server
 {
 	private:
 	    int port;
 	    std::string password;
-	    std::map<std::string, Channel*> channels;//map içinde arama yapılabilir
+	    std::map<std::string, Channel*> channels;
 	    int serverFd;
-		struct pollfd pfds[BACKLOG + 1];//pollfd sayısı artırılabilir
+		struct pollfd pfds[BACKLOG + 1];
 		int num_of_pfd;
 	    std::vector<Client *> clients;
-	    bool running; // Server çalışma durumu için flag
+	    bool running;
 	
 	public:
 	    Server();
@@ -52,7 +51,7 @@ class Server
 		bool handleClientPollout(int index);
 		void initServer(struct sockaddr_in &hints, int port);
 	    void start(int port, const char *pass);
-	    void stop(); // Server'ı güvenli şekilde durdurmak için
+	    void stop();
 	    void removeClient(int index);
 		void commandHandler(std::string cmd, std::vector<std::string> params, Client &client);
 		void checkRegistration(Client &client);
@@ -73,8 +72,6 @@ class Server
 		void handleWhois(const std::vector<std::string>& params, Client &client);
 		void handleAway(const std::vector<std::string>& params, Client &client);
 		
-	    //void acceptClient();
-	    //void handleClientMessage(int client_fd, const std::string& message);
 };
 
 void parseIrc(const std::string& line, std::string& cmd, std::vector<std::string>& params, std::string& trailing);

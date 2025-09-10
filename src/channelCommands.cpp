@@ -28,7 +28,6 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 		{
 			if (params.size() < 2)
 			{
-				// Sadece kanal modlarını listele
 				std::string modeList = "+";
 				if (targetChannel->isInviteOnly()) modeList += "i";
 				if (targetChannel->hasKey()) modeList += "k";
@@ -77,7 +76,6 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 							targetChannel->setTopicRestricted(adding);
 							break;
 						case 'o':
-							// +o/-o operatör modunu client parametresiyle birlikte handle et
 							if (params.size() < 3)
 							{
 								enqueue(client.outbuf, ":server 461 " + client.getNick() + " MODE :Not enough parameters\r\n");
@@ -195,7 +193,7 @@ void Server::handleTopic(const std::vector<std::string>& params, Client &client)
 		std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
 		std::string topicMsg = ":" + userMask + " TOPIC " + channelName + " :" + newTopic + "\r\n";
 		
-		targetChannel->sendMsg(topicMsg, NULL); // Kendine de gönder
+		targetChannel->sendMsg(topicMsg, NULL); 
 	}
 }
 
@@ -411,7 +409,7 @@ void Server::handleKick(const std::vector<std::string>& params, Client &client)
 	
 	std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
 	std::string kickMsg = ":" + userMask + " KICK " + channelName + " " + targetNick + " :" + kickMessage + "\r\n";
-	targetChannel->sendMsg(kickMsg, NULL); // Herkesi dahil et
+	targetChannel->sendMsg(kickMsg, NULL); 
 	targetChannel->removeClient(targetClient);
 	if (targetChannel->getMemberCount() == 0)
 	{

@@ -12,7 +12,6 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
     std::string target = params[0];    
     std::string message;
 
-    //ikiden fazla parametre varsa cümle olarak mesaj gelmiştir. mesajı birleştir.
     if (params.size() >= 2)
     {
         for (size_t i = 1; i < params.size(); ++i)
@@ -36,8 +35,6 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
         if (!target.empty())
             targetList.push_back(target);
     }
-
-    //targetlar virgülle ayrılmışsa
     
     std::string uMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
     
@@ -71,7 +68,6 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
         
         else
         {
-            // Özel mesaj
             Client* targetClient = NULL;
             
             for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
@@ -94,6 +90,34 @@ void Server::handlePrivMsg(const std::vector<std::string>& params, Client &clien
 
             enqueue(targetClient->outbuf, privmsgLine);
         }
+    }
+}
+
+void Server::handleAway(const std::vector<std::string>& params, Client &client)
+{
+    if (params.empty())
+    {
+        if (client.isAway())
+        {
+            client.setAway(false);
+            client.setAwayMessage("");
+            enqueue(client.outbuf, ":server 305 " + client.getNick() + " :You are no longer marked as being away\r\n");
+        }
+        else
+        {
+            enqueue(client.outbuf, ":server 306 " + client.getNick() + " :You have been marked as being away\r\n");
+        }
+    }
+    else
+    {
+        std::string message = params[0];
+        for (size_t i = 1; i < params.size(); ++i)
+        {
+            message += " " + params[i];
+        }
+        client.setAway(true);
+        client.setAwayMessage(message);
+        enqueue(client.outbuf, ":server 306 " + client.getNick() + " :You have been marked as being away\r\n");
     }
 }
 

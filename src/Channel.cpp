@@ -21,11 +21,9 @@ bool Channel::addClient(Client* client, const std::string& providedKey)
     if (invite_only && !isInvited(client->getNick()))
         return false;
     
-    // user limit (invite edilmişse bypass et)
     if (user_limit > 0 && (int)members.size() >= user_limit && !isInvited(client->getNick()))
         return false;
     
-    // Kullanıcıyı ekle
     members.push_back(client);
     
     if (members.size() == 1)
@@ -135,11 +133,11 @@ size_t Channel::getMemberCount() const
 
 void Channel::sendMsg(const std::string& message, Client* sender)
 {
-    for (std::vector<Client*>::iterator it = members.begin(); it != members.end(); ++it)//kanaldaki herkese mesajı gönderiyor
+    for (std::vector<Client*>::iterator it = members.begin(); it != members.end(); ++it)
     {
         if (*it != sender)
         {
-            (*it)->outbuf += message;//her bir üyenin output bufferına gönderiyor
+            (*it)->outbuf += message;
         }
     }
 }

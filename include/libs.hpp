@@ -2,10 +2,7 @@
 #define LIBS_HPP
 
 
-//defines
 
-//#define MAXCONN 100
-// TODO fkuyumcu : Bu MAXCONN kullanımı gereksiz. Zaten server.hpp de tanımlı
 
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"
@@ -17,8 +14,6 @@
 #define CYAN    "\033[36m"
 #define WHITE   "\033[37m"
 
-
-//includes
 
 
 #if defined(__linux__)

@@ -23,8 +23,8 @@ class Client
 	    ~Client();
 		
 		struct sockaddr_in in_soc;
-		std::string outbuf;//output bufferı
-		std::string inbuf; //input buffer for partial commands
+		std::string outbuf;
+		std::string inbuf;
 
 	    int getFd();
 		void setFd(int _fd);
