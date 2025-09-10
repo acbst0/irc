@@ -3,18 +3,12 @@
 
 void Server::checkRegistration(Client &client)
 {
-    // PASS doğrulanmadan kayıt tamamlanmasın
     if (!client.getNick().empty() && !client.getUname().empty() && client.getAuth() && !client.getRegis())
     {
         client.setRegis(true);
         
         std::string fullmask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
         
-        enqueue(client.outbuf, ":server 001 " + client.getNick() + " :Welcome to the Internet Relay Network " + fullmask + "\r\n");
-        enqueue(client.outbuf, ":server 002 " + client.getNick() + " :Your host is server, running version 1.0\r\n");
-        enqueue(client.outbuf, ":server 003 " + client.getNick() + " :This server was created\r\n");//tarih eklemeyi unutma
-        enqueue(client.outbuf, ":server 004 " + client.getNick() + " server 1.0 o o\r\n");
-        // MOTD yoksa bunu gönder (HexChat bekleyebilir)
         enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
     }
 }
@@ -34,39 +28,39 @@ bool Server::nicknameCheck(std::string nickname)
 
 void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
 {
-    if (cmd == "CAP")//cap bak
-    {
-        std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
-        if (params.empty())
-        {
-            enqueue(client.outbuf, ":server 461 " + nickOrStar + " CAP :Not enough parameters\r\n");
-            return;
-        }
-        std::string sub = params[0];
-        if (sub == "LS")
-        {
-            // Desteklenen capability yok: boş liste
-            enqueue(client.outbuf, ":server CAP " + nickOrStar + " LS :\r\n");
-        }
-        else if (sub == "LIST")
-        {
-            enqueue(client.outbuf, ":server CAP " + nickOrStar + " LIST :\r\n");
-        }
-        else if (sub == "REQ")
-        {
-            std::string req = params.size() > 1 ? params[1] : "";
-            enqueue(client.outbuf, ":server CAP " + nickOrStar + " NAK :" + req + "\r\n");
-        }
-        else if (sub == "END")
-        {
-            // noop
-        }
-        else
-        {
-            enqueue(client.outbuf, ":server 421 " + nickOrStar + " CAP :Unknown command\r\n");
-        }
-        return;
-    }
+    // if (cmd == "CAP")//cap bak
+    // {
+    //     std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
+    //     if (params.empty())
+    //     {
+    //         enqueue(client.outbuf, ":server 461 " + nickOrStar + " CAP :Not enough parameters\r\n");
+    //         return;
+    //     }
+    //     std::string sub = params[0];
+    //     if (sub == "LS")
+    //     {
+    //         // Desteklenen capability yok: boş liste
+    //         enqueue(client.outbuf, ":server CAP " + nickOrStar + " LS :\r\n");
+    //     }
+    //     else if (sub == "LIST")
+    //     {
+    //         enqueue(client.outbuf, ":server CAP " + nickOrStar + " LIST :\r\n");
+    //     }
+    //     else if (sub == "REQ")
+    //     {
+    //         std::string req = params.size() > 1 ? params[1] : "";
+    //         enqueue(client.outbuf, ":server CAP " + nickOrStar + " NAK :" + req + "\r\n");
+    //     }
+    //     else if (sub == "END")
+    //     {
+    //         // noop
+    //     }
+    //     else
+    //     {
+    //         enqueue(client.outbuf, ":server 421 " + nickOrStar + " CAP :Unknown command\r\n");
+    //     }
+    //     return;
+    // }
 
     if(cmd == "PASS")
     {
