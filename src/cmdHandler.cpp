@@ -28,39 +28,6 @@ bool Server::nicknameCheck(std::string nickname)
 
 void Server::commandHandler(std::string cmd, std::vector<std::string> params, Client &client)
 {
-    // if (cmd == "CAP")//cap bak
-    // {
-    //     std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
-    //     if (params.empty())
-    //     {
-    //         enqueue(client.outbuf, ":server 461 " + nickOrStar + " CAP :Not enough parameters\r\n");
-    //         return;
-    //     }
-    //     std::string sub = params[0];
-    //     if (sub == "LS")
-    //     {
-    //         // Desteklenen capability yok: boş liste
-    //         enqueue(client.outbuf, ":server CAP " + nickOrStar + " LS :\r\n");
-    //     }
-    //     else if (sub == "LIST")
-    //     {
-    //         enqueue(client.outbuf, ":server CAP " + nickOrStar + " LIST :\r\n");
-    //     }
-    //     else if (sub == "REQ")
-    //     {
-    //         std::string req = params.size() > 1 ? params[1] : "";
-    //         enqueue(client.outbuf, ":server CAP " + nickOrStar + " NAK :" + req + "\r\n");
-    //     }
-    //     else if (sub == "END")
-    //     {
-    //         // noop
-    //     }
-    //     else
-    //     {
-    //         enqueue(client.outbuf, ":server 421 " + nickOrStar + " CAP :Unknown command\r\n");
-    //     }
-    //     return;
-    // }
 
     if(cmd == "PASS")
     {
