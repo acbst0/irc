@@ -1,10 +1,12 @@
 #include "../include/libs.hpp"
 
-static std::vector<std::string> split(const std::string& s, char delim) {
+static std::vector<std::string> split(const std::string& s, char delim)
+{
     std::vector<std::string> elems;
     std::stringstream ss(s);
     std::string item;
-    while (std::getline(ss, item, delim)) {
+    while (std::getline(ss, item, delim))
+	{
         elems.push_back(item);
     }
     return elems;
@@ -16,23 +18,30 @@ void parseIrc(const std::string& line, std::string& cmd, std::vector<std::string
     
     size_t end = s.find_last_not_of(" \t\r\n");
 
-    if (end != std::string::npos) {
+    if (end != std::string::npos)
         s = s.substr(0, end + 1);
-    } else {
+	else
         s.clear();
-    }
     
-    if (!s.empty() && s[0]==':') {
+    if (!s.empty() && s[0]==':')
+	{
         size_t sp = s.find(' ');
-        s = (sp==std::string::npos) ? "" : s.substr(sp+1);
+        if (sp == std::string::npos)
+		    s = "";
+		else
+		    s = s.substr(sp + 1);
     }
     size_t colon = s.find(" :");
-    if (colon != std::string::npos) {
+    if (colon != std::string::npos)
+	{
         trailing = s.substr(colon+2);
         s = s.substr(0, colon);
     } else trailing.clear();
     std::vector<std::string> p = split(s, ' ');
-    cmd = p.empty() ? "" : p[0];
+    if (p.empty())
+	    cmd = "";
+	else
+	    cmd = p[0];
     for (size_t i=1;i<p.size();++i) if (!p[i].empty()) params.push_back(p[i]);
 }
 

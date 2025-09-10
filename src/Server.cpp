@@ -140,7 +140,8 @@ void Server::commandParser(Client &client, std::string &message)
 	std::vector<std::string> params;
 	parseIrc(message, cmd, params, trailing);
 	
-	if (!trailing.empty()) {
+	if (!trailing.empty())
+	{
 		params.push_back(trailing);
 	}
 	
@@ -189,8 +190,11 @@ void Server::handleClient(int i)
 					   (pos = inputBuffer.find("\n")) != std::string::npos)
 				{
 					std::string line = inputBuffer.substr(0, pos);
-					inputBuffer.erase(0, pos + ((inputBuffer[pos] == '\r') ? 2 : 1));
-					
+					if (inputBuffer[pos] == '\r')
+					    inputBuffer.erase(0, pos + 2);
+					else
+					    inputBuffer.erase(0, pos + 1);
+
 					if (!line.empty())
 					{
 						std::cout << "Processing complete command from client " << clients[j]->getFd() << ": " << line << std::endl;

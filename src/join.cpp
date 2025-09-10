@@ -10,7 +10,11 @@ void Server::handlePart(const std::vector<std::string>& params, Client &client)
     }
     
     std::string channels = params[0];
-    std::string partMessage = (params.size() > 1) ? params[1] : "";
+    std::string partMessage;
+	if (params.size() > 1)
+	    partMessage = params[1];
+	else
+	    partMessage = "";
     
     std::vector<std::string> channelList;
     
@@ -71,7 +75,11 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
     }
     
     std::string channels = params[0];
-    std::string keys = (params.size() > 1) ? params[1] : "";
+    std::string keys;
+	if (params.size() > 1)
+	    keys = params[1];
+	else
+	    keys = "";
     
     if (channels == "0")
     {
@@ -102,7 +110,11 @@ void Server::handleJoin(const std::vector<std::string>& params, Client &client)
     for (size_t i = 0; i < channelList.size(); ++i)
     {
         std::string channelName = channelList[i];
-        std::string channelKey = (i < keyList.size()) ? keyList[i] : "";
+        std::string channelKey;
+		if (i < keyList.size())
+		    channelKey = keyList[i];
+		else
+		    channelKey = "";
         
         if (channelName.empty() || (channelName[0] != '#' && channelName[0] != '&'))
         {

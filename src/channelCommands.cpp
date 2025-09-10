@@ -105,7 +105,11 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 									}
 									
 									std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
-									std::string modeMsg = ":" + userMask + " MODE " + target + " " + (adding ? "+o" : "-o") + " " + targetNick + "\r\n";
+									std::string modeMsg;
+									if (adding)
+									    modeMsg = ":" + userMask + " MODE " + target + " +o " + targetNick + "\r\n";
+									else
+									    modeMsg = ":" + userMask + " MODE " + target + " -o " + targetNick + "\r\n";
 									targetChannel->sendMsg(modeMsg, NULL);
 								}
 							}
@@ -199,7 +203,11 @@ void Server::handleTopic(const std::vector<std::string>& params, Client &client)
 
 void Server::handleName(const std::vector<std::string>& params, Client &client)
 {
-	std::string channelList = (params.empty()) ? "" : params[0];
+	std::string channelList;
+	if (params.empty())
+		channelList = "";
+	else
+		channelList = params[0];
 	std::vector<std::string> channelsToList;
 	
 	if (channelList.empty())
@@ -248,7 +256,11 @@ void Server::handleName(const std::vector<std::string>& params, Client &client)
 
 void Server::handleList(const std::vector<std::string>& params, Client &client)
 {
-	std::string channelList = (params.empty()) ? "" : params[0];
+	std::string channelList;
+	if (params.empty())
+		channelList = "";
+	else
+		channelList = params[0];
 	std::vector<std::string> channelsToList;
 	
 	if (channelList.empty())
@@ -362,7 +374,11 @@ void Server::handleKick(const std::vector<std::string>& params, Client &client)
 	
 	std::string channelName = params[0];
 	std::string targetNick = params[1];
-	std::string kickMessage = (params.size() > 2) ? params[2] : "Kicked";
+	std::string kickMessage;
+	if (params.size() > 2)
+	    kickMessage = params[2];
+	else
+	    kickMessage = "Kicked";
 	
 	std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
 	if (channelIt == this->channels.end())
@@ -420,7 +436,11 @@ void Server::handleKick(const std::vector<std::string>& params, Client &client)
 
 void Server::handleWho(const std::vector<std::string>& params, Client &client)
 {
-	std::string mask = (params.empty()) ? "" : params[0];
+	std::string mask;
+	if (params.empty())
+		mask = "";
+	else
+		mask = params[0];
 	
 	for (size_t i = 0; i < clients.size(); ++i)
 	{

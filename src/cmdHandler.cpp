@@ -70,7 +70,11 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
         
         if (nickname != client.getNick() && !nicknameCheck(nickname))
         {
-            std::string target = client.getNick().empty() ? "*" : client.getNick();
+            std::string target;
+			if (client.getNick().empty())
+				target = "*";
+			else
+				target = client.getNick();
             enqueue(client.outbuf, ":server 433 " + target + " " + nickname + " :Nickname is already in use\r\n");
             return;
         }
@@ -144,7 +148,11 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
     }
     else
     {
-        std::string nickOrStar = client.getNick().empty() ? "*" : client.getNick();
+        std::string nickOrStar;
+		if (client.getNick().empty())
+		    nickOrStar = "*";
+		else
+		    nickOrStar = client.getNick();
         enqueue(client.outbuf, ":server 421 " + nickOrStar + " " + cmd + " :Unknown command\r\n");
         return;
     }

@@ -9,11 +9,9 @@ Server* g_server = NULL;
 
 void signalHandler(int signal)
 {
-    std::cout << "\nSignal " << signal << " received. Shutting down" << std::endl;
+	(void)signal;
     if (g_server)
-    {
         g_server->stop();
-    }
 }
 
 bool validate(const std::string &portS)
@@ -51,6 +49,12 @@ int main(int argc, char* argv[])
     }
     std::string password = argv[2];
 
+	if (password.empty())
+	{
+		std::cerr << "Password cannot be empty." << std::endl;
+		return 1;
+	}
+
     if (!validate(argv[1]))
     {
 		std::cerr << "Invalid port. Provide a numeric port within range 1024-65535." << std::endl;
@@ -61,12 +65,15 @@ int main(int argc, char* argv[])
     signal(SIGTERM, signalHandler);
     signal(SIGQUIT, signalHandler);
     
-    try {
+    try
+	{
         Server server;
         g_server = &server;
 
         server.start(std::atoi(argv[1]), argv[2]);
-    } catch (const std::exception& e) {
+    }
+	catch (const std::exception& e)
+	{
         std::cerr << "Error: " << e.what() << std::endl;
         g_server = NULL;
         return 1;
