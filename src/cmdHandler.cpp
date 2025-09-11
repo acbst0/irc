@@ -9,7 +9,9 @@ void Server::checkRegistration(Client &client)
         
         std::string fullmask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
         
-        enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
+        enqueue(client.outbuf, ":server 375 " + client.getNick() + " :- server Message of the Day -\r\n");
+        enqueue(client.outbuf, ":server 372 " + client.getNick() + " :- carpe diem\r\n");
+        enqueue(client.outbuf, ":server 376 " + client.getNick() + " :End of /MOTD command\r\n");
     }
 }
 
@@ -159,7 +161,9 @@ void Server::commandHandler(std::string cmd, std::vector<std::string> params, Cl
 
     if (cmd == "MOTD")
     {
-        enqueue(client.outbuf, ":server 422 " + client.getNick() + " :MOTD File is missing\r\n");
+        enqueue(client.outbuf, ":server 375 " + client.getNick() + " :- server Message of the Day -\r\n");
+        enqueue(client.outbuf, ":server 372 " + client.getNick() + " :- carpe diem\r\n");
+        enqueue(client.outbuf, ":server 376 " + client.getNick() + " :End of /MOTD command\r\n");
         return;
     }
 
