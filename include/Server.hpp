@@ -33,26 +33,26 @@
 class Server
 {
 	private:
-	    int port;
-	    std::string password;
-	    std::map<std::string, Channel*> channels;
-	    int serverFd;
+		int port;
+		std::string password;
+		std::map<std::string, Channel*> channels;
+		int serverFd;
 		struct pollfd pfds[BACKLOG + 1];
 		int num_of_pfd;
-	    std::vector<Client *> clients;
-	    bool running;
+		std::vector<Client *> clients;
+		bool running;
 	
 	public:
-	    Server();
-	    ~Server();
+		Server();
+		~Server();
 	
 		void commandParser(Client &client, std::string &message);
 		void handleClient(int index);
 		bool handleClientPollout(int index);
 		void initServer(struct sockaddr_in &hints, int port);
-	    void start(int port, const char *pass);
-	    void stop();
-	    void removeClient(int index);
+		void start(int port, const char *pass);
+		void stop();
+		void removeClient(int index);
 		void commandHandler(std::string cmd, std::vector<std::string> params, Client &client);
 		void checkRegistration(Client &client);
 		bool nicknameCheck(std::string nickname);

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abostano <abostano@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/11 12:48:05 by abostano          #+#    #+#             */
+/*   Updated: 2025/09/11 12:53:06 by abostano         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
@@ -7,26 +19,26 @@
 class Client
 {
 	private:
-	    int fd;
-	    std::string nick;
-	    std::string username;
+		int fd;
+		std::string nick;
+		std::string username;
 		std::string realname;
 		std::string hostname;
-	    bool is_authenticated;
-	    bool is_registered;
-	    bool away;
-	    std::string awayMessage;
+		bool is_authenticated;
+		bool is_registered;
+		bool away;
+		std::string awayMessage;
 		
 		public:
 		Client();
-	    Client(int _fd);
-	    ~Client();
+		Client(int _fd);
+		~Client();
 		
 		struct sockaddr_in in_soc;
 		std::string outbuf;
 		std::string inbuf;
 
-	    int getFd();
+		int getFd();
 		void setFd(int _fd);
 		bool getAuth();
 		void setAuth(bool i);

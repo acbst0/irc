@@ -10,10 +10,14 @@ SRCS = src/main.cpp \
 		src/quit.cpp \
 		src/channelCommands.cpp
 
-CXX = c++ 
+CXX = c++
+
 RM = rm -rf
+
 FLAGS = -Wall -Wextra -Werror -std=c++98
+
 NAME = ircserv
+
 OBJS_DIR = objs
 
 O_FILES = $(SRCS:src/%.cpp=$(OBJS_DIR)/%.o)

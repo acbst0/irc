@@ -1,54 +1,66 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Utils.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abostano <abostano@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/11 12:48:45 by abostano          #+#    #+#             */
+/*   Updated: 2025/09/11 12:52:33 by abostano         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/libs.hpp"
 
 static std::vector<std::string> split(const std::string& s, char delim)
 {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim))
+	std::vector<std::string> elems;
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim))
 	{
-        elems.push_back(item);
-    }
-    return elems;
+		elems.push_back(item);
+	}
+	return elems;
 }
 
 void parseIrc(const std::string& line, std::string& cmd, std::vector<std::string>& params, std::string& trailing) 
 {
-    std::string s = line;
-    
-    size_t end = s.find_last_not_of(" \t\r\n");
+	std::string s = line;
+	
+	size_t end = s.find_last_not_of(" \t\r\n");
 
-    if (end != std::string::npos)
-        s = s.substr(0, end + 1);
+	if (end != std::string::npos)
+		s = s.substr(0, end + 1);
 	else
-        s.clear();
-    
-    if (!s.empty() && s[0]==':')
+		s.clear();
+	
+	if (!s.empty() && s[0]==':')
 	{
-        size_t sp = s.find(' ');
-        if (sp == std::string::npos)
-		    s = "";
+		size_t sp = s.find(' ');
+		if (sp == std::string::npos)
+			s = "";
 		else
-		    s = s.substr(sp + 1);
-    }
-    size_t colon = s.find(" :");
-    if (colon != std::string::npos)
+			s = s.substr(sp + 1);
+	}
+	size_t colon = s.find(" :");
+	if (colon != std::string::npos)
 	{
-        trailing = s.substr(colon+2);
-        s = s.substr(0, colon);
-    } else trailing.clear();
-    std::vector<std::string> p = split(s, ' ');
-    if (p.empty())
-	    cmd = "";
+		trailing = s.substr(colon+2);
+		s = s.substr(0, colon);
+	} else trailing.clear();
+	std::vector<std::string> p = split(s, ' ');
+	if (p.empty())
+		cmd = "";
 	else
-	    cmd = p[0];
-    for (size_t i=1;i<p.size();++i) if (!p[i].empty()) params.push_back(p[i]);
+		cmd = p[0];
+	for (size_t i=1;i<p.size();++i) if (!p[i].empty()) params.push_back(p[i]);
 }
 
 void enqueue(std::string &outbuf, const std::string& line)
 {
-    outbuf += line;
-    if (outbuf.size() > 1<<20) outbuf.erase(0, outbuf.size() - (1<<20));
+	outbuf += line;
+	if (outbuf.size() > 1<<20) outbuf.erase(0, outbuf.size() - (1<<20));
 }
 
 std::string to_string(int number)

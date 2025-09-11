@@ -11,22 +11,22 @@ Server::Server()
 
 Server::~Server()
 {
-    for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
-    {
-        delete it->second;
-    }
-    channels.clear();
-    
-    for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-    {
-        if ((*it)->getFd() > 0)
-            close((*it)->getFd());
-        delete *it;
-    }
-    clients.clear();
-    
-    if (serverFd > 0)
-        close(serverFd);
+	for (std::map<std::string, Channel*>::iterator it = channels.begin(); it != channels.end(); ++it)
+	{
+		delete it->second;
+	}
+	channels.clear();
+	
+	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if ((*it)->getFd() > 0)
+			close((*it)->getFd());
+		delete *it;
+	}
+	clients.clear();
+	
+	if (serverFd > 0)
+		close(serverFd);
 }
 
 void setNonBlocking(int fd)
@@ -37,8 +37,8 @@ void setNonBlocking(int fd)
 
 void Server::stop()
 {
-    std::cout << "Stopping..." << std::endl;
-    this->running = false;
+	std::cout << "Stopping..." << std::endl;
+	this->running = false;
 }
 
 
@@ -191,9 +191,9 @@ void Server::handleClient(int i)
 				{
 					std::string line = inputBuffer.substr(0, pos);
 					if (inputBuffer[pos] == '\r')
-					    inputBuffer.erase(0, pos + 2);
+						inputBuffer.erase(0, pos + 2);
 					else
-					    inputBuffer.erase(0, pos + 1);
+						inputBuffer.erase(0, pos + 1);
 
 					if (!line.empty())
 					{

@@ -1,12 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   channelCommands.cpp                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abostano <abostano@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/11 12:48:23 by abostano          #+#    #+#             */
+/*   Updated: 2025/09/11 12:50:32 by abostano         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/Server.hpp"
 
 void Server::handleMode(const std::vector<std::string>& params, Client &client)
 {
 	if (params.empty())
-    {
-        enqueue(client.outbuf, ":server 461 " + client.getNick() + " MODE :Not enough parameters\r\n");
-        return ;
-    }
+	{
+		enqueue(client.outbuf, ":server 461 " + client.getNick() + " MODE :Not enough parameters\r\n");
+		return ;
+	}
 
 	std::string target = params[0];
 	Channel* targetChannel = NULL;
@@ -107,9 +119,9 @@ void Server::handleMode(const std::vector<std::string>& params, Client &client)
 									std::string userMask = client.getNick() + "!" + client.getUname() + "@" + client.getHname();
 									std::string modeMsg;
 									if (adding)
-									    modeMsg = ":" + userMask + " MODE " + target + " +o " + targetNick + "\r\n";
+										modeMsg = ":" + userMask + " MODE " + target + " +o " + targetNick + "\r\n";
 									else
-									    modeMsg = ":" + userMask + " MODE " + target + " -o " + targetNick + "\r\n";
+										modeMsg = ":" + userMask + " MODE " + target + " -o " + targetNick + "\r\n";
 									targetChannel->sendMsg(modeMsg, NULL);
 								}
 							}
@@ -376,9 +388,9 @@ void Server::handleKick(const std::vector<std::string>& params, Client &client)
 	std::string targetNick = params[1];
 	std::string kickMessage;
 	if (params.size() > 2)
-	    kickMessage = params[2];
+		kickMessage = params[2];
 	else
-	    kickMessage = "Kicked";
+		kickMessage = "Kicked";
 	
 	std::map<std::string, Channel*>::iterator channelIt = this->channels.find(channelName);
 	if (channelIt == this->channels.end())
